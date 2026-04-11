@@ -1,15 +1,17 @@
-"""Engine, session factory, and schema bootstrap (PostGIS extension + create_all)."""
+"""Engine, session factory, and schema bootstrap (Alembic migrations)."""
 
 from __future__ import annotations
 
 from collections.abc import Generator
+from pathlib import Path
 
-from sqlalchemy import create_engine, text
+from alembic import command
+from alembic.config import Config
+from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, sessionmaker
 
 from database.config import get_database_url
-from database.tables import Base
 
 _engine: Engine | None = None
 _SessionLocal: sessionmaker[Session] | None = None
@@ -34,11 +36,13 @@ def get_session_factory() -> sessionmaker[Session]:
 
 
 def init_db() -> None:
-    """Create PostGIS extension (if allowed) and all tables."""
-    engine = get_engine()
-    with engine.begin() as conn:
-        conn.execute(text("CREATE EXTENSION IF NOT EXISTS postgis"))
-    Base.metadata.create_all(bind=engine)
+    """Apply Alembic migrations to ``head`` (includes PostGIS + all tables)."""
+    get_engine()
+    backend_root = Path(__file__).resolve().parent.parent
+    alembic_ini = backend_root / "alembic.ini"
+    cfg = Config(str(alembic_ini))
+    cfg.set_main_option("script_location", str(backend_root / "alembic"))
+    command.upgrade(cfg, "head")
 
 
 def get_db() -> Generator[Session, None, None]:

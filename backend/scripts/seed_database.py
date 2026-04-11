@@ -18,7 +18,20 @@ from sqlalchemy import delete, select
 
 from ai.cooling_tower_detection import detect_cooling_tower
 from database.engine import get_session_factory, init_db
-from database.tables import Building, BuildingScore, StateContextRow
+from database.tables import (
+    Building,
+    BuildingScore,
+    Company,
+    CompanyDocument,
+    CompanySustainabilityProfile,
+    CvDetection,
+    ImageryAsset,
+    PhysicalFeature,
+    PolicyDriver,
+    StateContextRow,
+    UtilityProfile,
+    WaterYieldEstimate,
+)
 from services.scoring import compute_viability
 
 _DATA = Path(__file__).resolve().parent.parent / "data"
@@ -62,8 +75,18 @@ def seed() -> None:
             building_rows.append(row)
 
     with SessionLocal() as session:
+        # Child tables first (FK order)
+        session.execute(delete(CvDetection))
+        session.execute(delete(ImageryAsset))
+        session.execute(delete(PolicyDriver))
+        session.execute(delete(PhysicalFeature))
+        session.execute(delete(WaterYieldEstimate))
+        session.execute(delete(UtilityProfile))
         session.execute(delete(BuildingScore))
+        session.execute(delete(CompanyDocument))
+        session.execute(delete(CompanySustainabilityProfile))
         session.execute(delete(Building))
+        session.execute(delete(Company))
         session.execute(delete(StateContextRow))
         session.commit()
 
@@ -92,6 +115,9 @@ def seed() -> None:
                     state_code=st,
                     city=(row.get("city") or "").strip() or None,
                     roof_area_sqft=float(row["roof_area_sqft"]),
+                    company_id=None,
+                    building_type=None,
+                    land_use_type=None,
                     latitude=lat,
                     longitude=lon,
                     footprint_geom=None,

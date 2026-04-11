@@ -2,8 +2,18 @@
 
 This document records **what we decided** for the relational schema and persistence layer, and **why**, so backend, frontend, and data teammates can align without re-litigating the same topics.
 
-**Stack:** PostgreSQL with **PostGIS** extension, **SQLAlchemy 2** ORM in the Python backend (`backend/database/`).  
+**Stack:** PostgreSQL with **PostGIS** extension, **SQLAlchemy 2** ORM in the Python backend (`backend/database/`), **Alembic** for versioned schema migrations (`backend/alembic/`).  
 **Scope:** Hackathon prototype; prefer **simple, conservative** tables with clear paths to extend later.
+
+### Alembic-style versioned migrations (what that means)
+
+**Alembic** is a migration tool for SQLAlchemy. A **versioned migration** is a small Python (or SQL) script stored in `backend/alembic/versions/` with a unique revision id and a **parent** revision, forming a linear (or branched) history.
+
+- **`alembic upgrade head`** applies every migration that has not run yet, in order, so each environment (laptop, CI, staging) reaches the **same** schema.
+- **`alembic revision -m "describe change"`** adds a new migration file; with **`--autogenerate`**, Alembic compares your SQLAlchemy models to the live database and drafts DDL (you still review/edit, especially for PostGIS).
+- The app calls **`alembic upgrade head`** on startup via `init_db()` so the database matches the code **without** hand-running SQL for every deploy.
+
+This replaces ad hoc “run this SQL once” instructions and avoids drift between teammates.
 
 ---
 
@@ -89,14 +99,25 @@ This document records **what we decided** for the relational schema and persiste
 
 ## 12. Current implementation (this repo)
 
-| Piece | Role |
+**Tables (SQLAlchemy + Alembic initial revision):**
+
+| Table | Role |
 |--------|------|
-| **`state_context`** | Per-state rainfall and water price inputs for MVP scoring. |
-| **`buildings`** | Core site; `state_code`, roof area, lat/lon, optional `footprint_geom`. |
-| **`building_scores`** | Single current rollup per building: `final_viability_score`, `climate_risk_score`, nullable `corporate_esg_score`, nullable `detection_confidence_score`, `computed_at`. |
+| **`state_context`** | Per-state rainfall and water price (MVP inputs). |
+| **`companies`** | Corporate owner/operator (ESG / SEC linkage). |
+| **`company_sustainability_profiles`** | Company-level ESG / climate flags and scores. |
+| **`company_documents`** | Filing metadata; **externalized** body via `storage_uri` / hash (no huge blobs in DB by default). |
+| **`buildings`** | Core site; optional `company_id`, `state_code`, roof area, lat/lon, optional `footprint_geom`. |
+| **`imagery_assets`** | Satellite / imagery metadata + optional `bounding_geom`. |
+| **`cv_detections`** | Raw CV rows (confidence, optional `image_id`, geoms). |
+| **`physical_features`** | Interpreted roof/tower inputs + `physical_fit_score` (feature layer, not the only source of truth for final rollups). |
+| **`water_yield_estimates`** | Harvest math + optional `monthly_harvest_json`. |
+| **`utility_profiles`** | Water/wastewater economics (one row per building for MVP). |
+| **`policy_drivers`** | Many incentives/regulatory rows per building. |
+| **`building_scores`** | **Canonical** current rollup: pillar fields (`physical_fit_score`, `water_yield_score`, …), `final_viability_score`, `opportunity_tier`, `computed_at`. |
 
 - **CSV fallback:** If **`DATABASE_URL`** is unset, the API still reads **`backend/data/*.csv`** so anyone can run without Docker.
-- **Postgres path:** **`docker-compose.yml`** provides PostGIS; **`backend/scripts/seed_database.py`** loads CSVs and **writes computed** `final_viability_score` (and a **placeholder** `climate_risk_score` for demo). **Tower confidences** remain **computed in app code** until the CV pipeline writes **`detection_confidence_score`**.
+- **Postgres path:** **`docker-compose.yml`** provides PostGIS; **`init_db()`** runs **`alembic upgrade head`**; **`backend/scripts/seed_database.py`** loads CSVs and seeds **`building_scores`** (and truncates child tables safely). **Tower confidences** are aggregated into **`detection_confidence_score`** when the CV pipeline exists; seed leaves it null.
 - **Note:** If **`final_viability_score`** is overridden from **`building_scores`** but the API still returns a **computed breakdown** dict, those subscores may not sum to the overridden total until the scoring service persists full breakdowns (acceptable for the prototype).
 
 ---
@@ -106,7 +127,7 @@ This document records **what we decided** for the relational schema and persiste
 - **Score history** table or append-only **`building_scores`** versions + `score_version`.
 - **Bbox / map viewport queries** using PostGIS + GiST (after state-level ship).
 - **County / MSA** choropleth: add **`county_fips`** or similar.
-- **Company / document** tables for SEC/SBTi when ingestion exists.
+- **Wire ingestion** into `companies`, `company_documents`, `imagery_assets`, `cv_detections`, etc. (tables exist; pipelines TBD).
 - **PII / retention** for addresses — only if product requires it.
 
 ---
@@ -115,8 +136,10 @@ This document records **what we decided** for the relational schema and persiste
 
 1. `docker compose up -d` (repo root).
 2. Copy `backend/.env.example` → `backend/.env` (or export `DATABASE_URL`).
-3. From `backend/`: `python scripts/seed_database.py`.
+3. From `backend/`: `python scripts/seed_database.py` (runs migrations via `init_db()`, then seeds).
 4. Start API: `uvicorn main:app --reload` (working directory `backend/`).
+
+**Schema changes:** edit `database/tables.py`, then from `backend/` run `alembic revision --autogenerate -m "short description"` (review the generated file, especially geometry columns), then `alembic upgrade head`.
 
 ---
 
