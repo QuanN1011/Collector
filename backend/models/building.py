@@ -2,13 +2,15 @@ from pydantic import BaseModel, Field
 
 
 class BuildingRecord(BaseModel):
-    """Row from buildings dataset (CSV → DB later)."""
+    """Row from buildings dataset (Postgres or CSV fallback)."""
 
     id: str
     name: str
     state: str = Field(..., min_length=2, max_length=2, description="US state code, e.g. TX")
     city: str | None = None
     roof_area_sqft: float = Field(..., gt=0, description="Effective catchment area (MVP: equals footprint)")
+    latitude: float | None = Field(None, description="Map pin; prefer DB + seed when using Postgres")
+    longitude: float | None = Field(None, description="Map pin; prefer DB + seed when using Postgres")
 
 
 class BuildingEnriched(BaseModel):
@@ -19,6 +21,8 @@ class BuildingEnriched(BaseModel):
     state: str
     city: str | None
     roof_area_sqft: float
+    latitude: float | None = None
+    longitude: float | None = None
     rainfall_inches_annual: float
     water_price_per_1000_gal_usd: float
     rainwater_potential_gallons: float

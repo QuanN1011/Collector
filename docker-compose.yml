@@ -1,0 +1,19 @@
+# Local Postgres + PostGIS for RainUSE Nexus backend.
+# Usage: docker compose up -d
+# Then:  export DATABASE_URL=postgresql+psycopg://rainuse:rainuse@localhost:5432/rainuse
+#         cd backend && python scripts/seed_database.py
+
+services:
+  db:
+    image: postgis/postgis:16-3.4-alpine
+    environment:
+      POSTGRES_USER: rainuse
+      POSTGRES_PASSWORD: rainuse
+      POSTGRES_DB: rainuse
+    ports:
+      - "5432:5432"
+    volumes:
+      - rainuse_pgdata:/var/lib/postgresql/data
+
+volumes:
+  rainuse_pgdata:
