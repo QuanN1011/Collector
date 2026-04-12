@@ -25,13 +25,6 @@ const InteractiveTopUI: React.FC = () => {
     const drawTopography = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-      gradient.addColorStop(0, 'rgba(15, 23, 42, 0.12)');
-      gradient.addColorStop(0.45, 'rgba(30, 41, 59, 0.08)');
-      gradient.addColorStop(1, 'rgba(248, 250, 252, 0.04)');
-      ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
       const lineCount = 12;
       const amplitude = 24;
       const spacing = canvas.height / (lineCount + 1.5);
@@ -101,11 +94,12 @@ const InteractiveTopUI: React.FC = () => {
   }, [mousePos]);
 
   return (
-    <canvas
-      ref={canvasRef}
-      className="pointer-events-none absolute inset-0"
-      style={{ zIndex: 1 }}
-    />
+    <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 1 }}>
+      <canvas
+        ref={canvasRef}
+        className="absolute inset-0"
+      />
+    </div>
   );
 };
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import InteractiveTopUI from "./Components/InteractiveTopUI";
 import Header from "./Components/Header";
 import Footer from "./Components/Footer";
@@ -76,7 +76,42 @@ export default function Home() {
   const [pipeLength, setPipeLength] = useState(INITIALS.pipeLength);
   const [pumpEfficiency, setPumpEfficiency] = useState(INITIALS.pumpEfficiency);
   const [pumpCount, setPumpCount] = useState(INITIALS.pumpCount);
+    const videoScrollContainerRef = useRef<HTMLDivElement>(null);
+    const [videoProgress, setVideoProgress] = useState(0);
+    const [scrollPastVideo, setScrollPastVideo] = useState(0);
 
+    useEffect(() => {
+      let ticking = false;
+      const handleScroll = () => {
+        if (!ticking) {
+          window.requestAnimationFrame(() => {
+            if (!videoScrollContainerRef.current) {
+              ticking = false;
+              return;
+            }
+            const rect = videoScrollContainerRef.current.getBoundingClientRect();
+            
+            // We only want to animate when the container's top hits the viewport
+            const scrolled = -rect.top;
+            const totalScrollable = rect.height - window.innerHeight;
+            
+            if (totalScrollable > 0) {
+              const progress = Math.max(0, Math.min(1, scrolled / totalScrollable));
+              setVideoProgress(progress);
+              // How far past the video container we've scrolled (0→1 over 10vh)
+              const pastAmount = Math.max(0, Math.min(1, (scrolled - totalScrollable) / (window.innerHeight * 0.1)));
+              setScrollPastVideo(pastAmount);
+            }
+            ticking = false;
+          });
+          ticking = true;
+        }
+      };
+
+      window.addEventListener("scroll", handleScroll, { passive: true });
+      handleScroll(); // Initialize on mount
+      return () => window.removeEventListener("scroll", handleScroll);
+    }, []);
   useEffect(() => {
     async function fetchBuilding() {
       setLoading(true);
@@ -132,18 +167,64 @@ export default function Home() {
     return () => observer.disconnect();
   }, []);
 
+
+
+  // Nav visibility: fade out at 1-4% video progress, fade back in once scrolled past container
+  const navOpacity = videoProgress < 0.01
+    ? 1
+    : videoProgress < 0.04
+      ? 1 - ((videoProgress - 0.01) / 0.03)
+      : scrollPastVideo > 0
+        ? scrollPastVideo
+        : 0;
+
   return (
-    <div className="relative overflow-x-hidden bg-slate-50 text-slate-950">
-      <Header />
+    <div className="relative overflow-x-hidden bg-white text-slate-950">
+      <Header navOpacity={navOpacity} />
 
       {/* Hero Section */}
-      <section className="relative min-h-screen overflow-hidden pt-20">
+      <section className="relative min-h-screen overflow-hidden pt-20 bg-white">
         <InteractiveTopUI />
-        <div className="absolute inset-0 bg-gradient-to-b from-white/60 via-white/40 to-slate-50/40" style={{ zIndex: 1 }} />
+        <div className="absolute inset-0 bg-gradient-to-b from-white/20 via-transparent to-transparent" style={{ zIndex: 1 }} />
+
+        {/* SVG reveal animations */}
+        <style dangerouslySetInnerHTML={{__html: `
+          @keyframes content-reveal {
+            0% { clip-path: inset(0 100% 0 0); opacity: 0; }
+            100% { clip-path: inset(0 0 0 0); opacity: 1; }
+          }
+          .animate-reveal-left {
+            animation: content-reveal 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+          }
+          .animate-reveal-right {
+            animation: content-reveal 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.3s forwards;
+            opacity: 0;
+          }
+        `}} />
+
+        {/* White Cards - zIndex: 0 keeps them under the wave effect */}
+        <div className="pointer-events-none absolute inset-x-0 top-32 flex justify-between px-4 2xl:px-12" style={{ zIndex: 0 }}>
+          
+          {/* Left Card: No Rain */}
+          <div className="hidden xl:flex relative animate-reveal-left rounded-none bg-white shadow-[0_20px_50px_rgba(15,23,42,0.1)] border border-slate-100 items-center justify-center p-10 w-[35vw] max-w-[850px] h-[700px]" style={{ transform: 'translateX(-30px)' }}>
+            <img src="/norain.svg" className="w-full h-full object-contain" alt="No Rain" />
+            
+              {/* Animated Dot for the 'A' in 'rain' - styled as a graphite brush stroke */}
+              <div className="absolute flex items-center justify-center h-4 w-4" style={{ top: 'calc(50% + 2.5px)', left: 'calc(69% + 2.5px)' }}>
+                <span className="animate-ping absolute inline-flex h-full w-full bg-zinc-500 opacity-40" style={{ borderRadius: '60% 40% 50% 70% / 50% 60% 40% 50%' }}></span>
+                <span className="relative inline-flex h-[14px] w-[12px] bg-zinc-800/90" style={{ borderRadius: '40% 60% 70% 40% / 50% 40% 60% 50%', transform: 'rotate(12deg)', filter: 'drop-shadow(0px 1px 0px rgba(0,0,0,0.5))' }}></span>
+            </div>
+          </div>
+
+          {/* Right Card: Pls */}
+            <div className="hidden xl:flex animate-reveal-right rounded-none bg-white shadow-[0_20px_50px_rgba(15,23,42,0.1)] border border-slate-100 items-center justify-center p-10 w-[38vw] max-w-[950px] h-[600px] mt-24" style={{ transform: 'translateX(175px)' }}>
+              <img src="/pls.svg" className="w-full h-full object-contain" alt="Pls" />
+            </div>
+        </div>
 
         <main className="relative z-10 mx-auto flex flex-col gap-6 px-6 sm:px-10 lg:px-16 pt-8">
           {/* Hero Section */}
-          <section className="relative mx-auto flex w-full max-w-5xl flex-col items-center gap-10 py-20 text-center">
+          <section className="relative mx-auto flex w-full max-w-5xl flex-col items-center gap-10 pt-20 pb-4 text-center">
             <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden rounded-[2.5rem] opacity-90">
               <HeroLines />
             </div>
@@ -173,19 +254,37 @@ export default function Home() {
                 Learn more
               </a>
             </div>
-
-            <div className="relative w-full overflow-hidden rounded-[2.5rem] border border-slate-200 bg-white shadow-[0_35px_100px_rgba(15,23,42,0.12)] sm:h-[560px] reveal" data-reveal>
-              <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-slate-50/80 to-transparent" />
-              <video autoPlay loop muted playsInline className="h-[420px] w-full object-cover sm:h-full">
-                <source src="/Valve Oil Gauge Video.mp4" type="video/mp4" />
-              </video>
-              <div className="absolute left-6 bottom-6 rounded-full bg-slate-950/95 px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-white shadow-xl shadow-slate-950/20">
-                Live valve telemetry
-              </div>
-            </div>
           </section>
         </main>
       </section>
+
+      {/* Full Screen Scroll Video Section */}
+      <div className="relative w-full" ref={videoScrollContainerRef} style={{ height: '200vh', marginTop: '-27.5rem', marginBottom: '-100vh' }}>
+        <div className="sticky top-0 h-screen w-full overflow-hidden">
+          <div 
+            className="absolute inset-0 flex items-center justify-center"
+            style={{
+              opacity: videoProgress > 0.85 ? 1 - ((videoProgress - 0.85) / 0.15) : 1,
+            }}
+          >
+            <div 
+              className="relative overflow-hidden bg-black will-change-transform"
+              style={{
+                width: `calc(82vw + ${Math.min(1, videoProgress * 7)} * 18vw)`,
+                height: `calc(82vh + ${Math.min(1, videoProgress * 7)} * 18vh)`,
+                borderRadius: `${2.5 * (1 - Math.min(1, videoProgress * 7))}rem`,
+              }}
+            >
+              <video autoPlay loop muted playsInline className="h-full w-full object-cover">
+                <source src="/Valve Oil Gauge Video.mp4" type="video/mp4" />
+              </video>
+              <div className="absolute left-6 bottom-6 rounded-full bg-white/10 backdrop-blur-md px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-white shadow-xl z-10">
+                Live valve telemetry
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* MVP Optimizer Section */}
       <section id="optimizer" className="relative py-20 px-6 sm:px-10 lg:px-16 bg-slate-50">

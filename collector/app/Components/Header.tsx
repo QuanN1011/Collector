@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-export default function Header() {
+export default function Header({ navOpacity = 1 }: { navOpacity?: number }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [backgroundType, setBackgroundType] = useState<'light' | 'dark' | 'gradient'>('light');
 
@@ -55,14 +55,31 @@ export default function Header() {
   };
 
   return (
-    <header className={getGlassmorphismClasses()}>
+    <header className={getGlassmorphismClasses()} style={{ opacity: navOpacity, pointerEvents: navOpacity < 0.1 ? 'none' : 'auto', transition: 'opacity 0.3s ease' }}>
       <div className="mx-auto max-w-7xl px-6 py-4 sm:px-10 lg:px-16">
         <div className="flex items-center justify-between">
           {/* Logo */}
+          <style dangerouslySetInnerHTML={{__html: `
+            @keyframes gentle-shake {
+              0% { transform: rotate(-8deg); }
+              15% { transform: rotate(-13deg) scale(1.15); }
+              30% { transform: rotate(-4deg) scale(1.18); }
+              45% { transform: rotate(-12deg) scale(1.15); }
+              60% { transform: rotate(-5deg) scale(1.12); }
+              75% { transform: rotate(-10deg) scale(1.06); }
+              100% { transform: rotate(-8deg) scale(1); }
+            }
+            .logo-hover:hover {
+              animation: gentle-shake 1s ease-in-out;
+            }
+          `}} />
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-950 text-white shadow-lg">
-              <span className="text-lg font-bold">C</span>
-            </div>
+            <img
+              src="/bucket.svg"
+              alt="Collector"
+              className="h-8 w-8 logo-hover transition-transform duration-700 ease-in-out"
+              style={{ transform: 'rotate(-8deg)' }}
+            />
             <span className={`text-xl font-bold uppercase tracking-wide ${getTextClasses()}`}>
               Collector
             </span>
