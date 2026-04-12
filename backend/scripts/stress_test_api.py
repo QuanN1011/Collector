@@ -10,13 +10,15 @@ Usage (API must be running)::
   export DATABASE_URL=...   # if testing with DB
   PYTHONPATH=. uvicorn main:app --host 127.0.0.1 --port 8000
 
-  # another terminal:
+  # another terminal (with DB + API keys, pass your key):
+  # export RAINUSE_API_KEY=rainuse_...
   PYTHONPATH=. python scripts/stress_test_api.py --base-url http://127.0.0.1:8000
 """
 
 from __future__ import annotations
 
 import argparse
+import os
 import statistics
 import sys
 import time
@@ -53,9 +55,9 @@ def _one(client: httpx.Client, base: str, path: str) -> Result:
         return Result(path=path, status=0, ms=ms)
 
 
-def _worker(base: str, paths: list[str], repeats: int) -> RunStats:
+def _worker(base: str, paths: list[str], repeats: int, headers: dict[str, str] | None) -> RunStats:
     out = RunStats()
-    with httpx.Client() as client:
+    with httpx.Client(headers=headers or None) as client:
         for _ in range(repeats):
             for path in paths:
                 res = _one(client, base, path)
@@ -94,11 +96,21 @@ def main() -> None:
         ],
         help="Paths to GET (relative to base URL)",
     )
+    parser.add_argument(
+        "--api-key",
+        default=os.environ.get("RAINUSE_API_KEY", ""),
+        help="X-Api-Key for protected routes (or set RAINUSE_API_KEY)",
+    )
     args = parser.parse_args()
+
+    headers: dict[str, str] = {}
+    if args.api_key.strip():
+        headers["X-Api-Key"] = args.api_key.strip()
 
     print(f"Target: {args.base_url}")
     print(f"Workers: {args.workers}, repeats per path per worker: {args.repeats}")
     print(f"Paths: {args.paths}")
+    print(f"X-Api-Key: {'set' if headers else 'not set (OK if API runs without DB)'}")
     print("---")
 
     t0 = time.perf_counter()
@@ -107,7 +119,7 @@ def main() -> None:
 
     with ThreadPoolExecutor(max_workers=args.workers) as ex:
         futures = [
-            ex.submit(_worker, args.base_url, list(args.paths), args.repeats) for _ in range(args.workers)
+            ex.submit(_worker, args.base_url, list(args.paths), args.repeats, headers) for _ in range(args.workers)
         ]
         for fut in as_completed(futures):
             st = fut.result()

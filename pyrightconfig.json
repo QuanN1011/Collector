@@ -1,0 +1,8 @@
+{
+  "include": ["backend"],
+  "exclude": ["**/__pycache__", "**/.venv", "backend/migrations/versions"],
+  "pythonVersion": "3.12",
+  "venvPath": "backend",
+  "venv": ".venv",
+  "reportImplicitRelativeImport": "none"
+}

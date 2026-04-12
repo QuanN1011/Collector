@@ -304,3 +304,5 @@ class BuildingScore(Base):
     computed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     building: Mapped[Building] = relationship(back_populates="scores")
+
+# API keys: see ``database.api_keys_dataset`` (separate module to reduce merge churn).

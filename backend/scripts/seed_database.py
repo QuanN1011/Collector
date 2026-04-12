@@ -36,9 +36,9 @@ _BACKEND_ROOT = Path(__file__).resolve().parent.parent
 if str(_BACKEND_ROOT) not in sys.path:
     sys.path.insert(0, str(_BACKEND_ROOT))
 
-from dotenv import load_dotenv
+from env_load import load_backend_env
 
-load_dotenv(_BACKEND_ROOT / ".env")
+load_backend_env()
 
 from geoalchemy2.elements import WKTElement
 from sqlalchemy import delete, select

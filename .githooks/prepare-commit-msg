@@ -1,0 +1,4 @@
+#!/bin/sh
+# Repo-local hook: pass-through only. Does not append any tool or Co-authored-by footers.
+# This repo uses `core.hooksPath` pointing here so optional global hooks are not chained.
+exit 0

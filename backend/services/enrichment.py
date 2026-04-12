@@ -23,7 +23,8 @@ def enrich_building(record: BuildingRecord, state_ctx: StateContext | None = Non
         building_id=record.id,
     )
     stored_final = get_stored_final_viability_standalone(record.id)
-    if stored_final is not None:
+    # Detail with Satellite + AI uses computed score so CV/mock physical can move the headline.
+    if stored_final is not None and not live_cv:
         score = stored_final
     esg = mock_esg_subscore(record.id)
 
