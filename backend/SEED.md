@@ -14,7 +14,7 @@ Running `scripts/seed_database.py` (or `scripts/populate_database.py`) applies A
 | --- | --- |
 | `state_context` | `data/state_context.csv` (state-level rainfall inches/year and water \$/1,000 gal) |
 | `companies`, `company_sustainability_profiles`, `company_documents` | `data/companies.csv`, `company_sustainability_profiles.csv`, `company_documents.csv` |
-| `buildings` | `data/buildings.csv` (+ synthetic **MULTIPOLYGON** footprints from roof area and lat/lon) |
+| `buildings` | **`data/buildings_catalog.csv`** by default (Microsoft TX footprints + synthetic AZ/PA). Rows without `footprint_wkt` get synthetic **MULTIPOLYGON** footprints in `seed_database.py`. |
 | `imagery_assets` | Generated metadata (Sentinel-2 / Landsat–style labels, GEE-style placeholder URIs) |
 | `cv_detections` | Deterministic mock CV (`ai/cooling_tower_detection`) plus roof/obstruction rows |
 | `physical_features`, `water_yield_estimates`, `utility_profiles`, `policy_drivers`, `building_scores` | Derived in `seed_database.py` using `services/seed_scoring.py` |
@@ -48,8 +48,9 @@ Running `scripts/seed_database.py` (or `scripts/populate_database.py`) applies A
 
 ```bash
 cd backend
-python scripts/generate_building_seed_csv.py   # rewrites data/buildings.csv
+python scripts/generate_building_seed_csv.py   # rewrites data/buildings.csv (synthetic AZ/PA/…)
+python scripts/merge_buildings_catalog.py      # rebuilds data/buildings_catalog.csv (Microsoft TX + synthetic non-TX)
 python scripts/seed_database.py
 ```
 
-The generator is deterministic (`random.Random(42)`) for reproducible footprints and sizes.
+To refresh **Microsoft** Texas rows (large download), see `scripts/ingest_ms_buildings.py` (state-limited) and `docs/DATABASE_SEED_DATA.md`. The synthetic generator is deterministic (`random.Random(42)`) for reproducible sizes.

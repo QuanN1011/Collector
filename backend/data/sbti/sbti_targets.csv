@@ -1,0 +1,16 @@
+company_id,organization_name,near_term_status,net_zero_status,snapshot_date
+cmp-amzn,Amazon.com Inc,Targets Set,Committed,2024-06-01
+cmp-wmt,Walmart Inc,Targets Set,Committed,2024-06-01
+cmp-tgt,Target Corporation,Targets Set,Committed,2024-06-01
+cmp-fdx,FedEx Corporation,Targets Set,,2024-06-01
+cmp-ups,United Parcel Service Inc,Targets Set,Committed,2024-06-01
+cmp-tsla,Tesla Inc,Targets Set,,2024-06-01
+cmp-gm,General Motors Co,Targets Set,Committed,2024-06-01
+cmp-intc,Intel Corporation,Targets Set,Committed,2024-06-01
+cmp-mu,Micron Technology Inc,Targets Set,Committed,2024-06-01
+cmp-ko,Coca-Cola Company,Targets Set,Committed,2024-06-01
+cmp-pep,PepsiCo Inc,Targets Set,Committed,2024-06-01
+cmp-xom,Exxon Mobil Corporation,Committed,,2024-06-01
+cmp-cvs,CVS Health Corporation,Targets Set,,2024-06-01
+cmp-hd,Home Depot Inc,Targets Set,,2024-06-01
+cmp-nke,Nike Inc,Targets Set,Committed,2024-06-01

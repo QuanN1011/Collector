@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Query
 
-from database.db import get_state_context, get_building, list_buildings
+from database.db import get_state_context, get_building, list_buildings, persist_building_cv_snapshot
 from models.building import BuildingEnriched
 from services.enrichment import enrich_building
 
@@ -35,4 +35,17 @@ def get_one_building(
     record = get_building(building_id)
     if record is None:
         raise HTTPException(status_code=404, detail="Building not found")
-    return enrich_building(record, live_cv=live_cv)
+    out = enrich_building(record, live_cv=live_cv)
+    if (
+        live_cv
+        and out.physical_analysis.selected_cooling_tower_source == "cv_live"
+        and out.physical_analysis.cooling_tower_detected is not None
+        and out.physical_analysis.cooling_tower_confidence is not None
+    ):
+        persist_building_cv_snapshot(
+            record.id,
+            cooling_tower_detected=out.physical_analysis.cooling_tower_detected,
+            cooling_tower_confidence=out.physical_analysis.cooling_tower_confidence,
+            inference_model=out.physical_analysis.inference_model,
+        )
+    return out

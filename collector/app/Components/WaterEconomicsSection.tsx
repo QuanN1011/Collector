@@ -87,14 +87,6 @@ export default function WaterEconomicsSection({
                 </p>
               </div>
             </div>
-
-            <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50/80 p-4 text-xs leading-relaxed text-slate-600">
-              <p className="font-semibold text-slate-800">Using organizer or web tables</p>
-              <p className="mt-2">
-                If the source gives <strong>average monthly bills</strong>, convert to dollars per 1,000 gallons with a clear
-                usage assumption before entering them in your state data (see project docs on water pricing).
-              </p>
-            </div>
           </div>
         )}
       </div>
@@ -128,12 +120,14 @@ export default function WaterEconomicsSection({
             </div>
 
             <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <label className="block text-sm font-semibold text-slate-950">Stress-test utility rate</label>
+              <label htmlFor="water-price-sensitivity" className="block text-sm font-semibold text-slate-950">
+                Water price sensitivity
+              </label>
               <p className="mt-1 text-xs text-slate-600">
-                See how annual value changes if potable rates run {ratePct}% of today&apos;s reference ($
-                {formatNumber(stressedPrice, 2)}/1k gal).
+                See how annual value changes as water price varies from the reference rate.
               </p>
               <input
+                id="water-price-sensitivity"
                 type="range"
                 min={70}
                 max={150}

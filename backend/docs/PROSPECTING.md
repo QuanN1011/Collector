@@ -7,7 +7,7 @@ This doc is the **handoff** for “prospecting by state”: how building data is
 | Mode | When | Buildings | State context (rainfall + water $/1k gal) |
 |------|------|-----------|---------------------------------------------|
 | **Postgres** | `DATABASE_URL` set in `backend/.env` | `buildings` table (seeded from fixtures) | `state_context` table |
-| **CSV fallback** | `DATABASE_URL` unset | `backend/data/buildings.csv` | `backend/data/state_context.csv` |
+| **CSV fallback** | `DATABASE_URL` unset | `backend/data/buildings_catalog.csv` (else `buildings.csv`) | `backend/data/state_context.csv` |
 
 Both paths expose the **same** FastAPI routes. After changing CSVs, **restart** the server (`@lru_cache` loads CSVs once per process).
 
@@ -60,7 +60,7 @@ Then: `GET http://127.0.0.1:8000/states` → `GET /buildings?state=TX`.
 
 ## Related code
 
-- `database/db.py` — `list_buildings`, `get_building`, `get_state_context`, `parse_state_code`, `list_states_with_buildings`  
+- `database/db.py` — `list_buildings`, `get_building`, `get_state_context`, `parse_state_code`, `list_states_from_state_context` (``GET /states``), `list_states_with_buildings` (distinct from buildings if needed elsewhere)  
 - `routes/states.py` — `GET /states`  
 - `routes/buildings.py`, `routes/prospects.py` — state validation + **400** handling  
 - `scripts/smoke_test.py` — regression checks for `/states` and multi-state lists  

@@ -11,8 +11,8 @@ def live_cv_enabled(settings: "Settings") -> bool:
     """
     Whether the live GEE + Gemini path is allowed when the client sends ``live_cv=true``.
 
-    - ``ENABLE_LIVE_CV=false`` / ``0`` / ``off`` → never live (stay on mock).
-    - ``ENABLE_LIVE_CV=true`` / ``1`` / ``on`` → allow live (still needs credentials to succeed).
+    - ``ENABLE_LIVE_CV=false`` / ``0`` / ``off`` → never live (catalog-only tower: unavailable).
+    - ``ENABLE_LIVE_CV=true`` / ``1`` / ``on`` → allow live (still needs GEE + Gemini to succeed).
     - Unset or empty → **auto**: allow live when both ``GEMINI_API_KEY`` and ``GEE_PROJECT_ID`` are set.
     """
     raw = os.environ.get("ENABLE_LIVE_CV")

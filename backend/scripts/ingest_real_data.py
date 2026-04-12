@@ -11,6 +11,8 @@ Examples::
   python scripts/ingest_real_data.py precip --merge-water-from data/state_context.csv
 
   # 3) Run both then seed Postgres (requires DATABASE_URL)
+  python scripts/ingest_real_data.py all --all-states --min-sqft 100000 --max-per-state 300
+  # or subset:
   python scripts/ingest_real_data.py all --states Texas Arizona Pennsylvania \\
     --min-sqft 100000 --max-per-state 120
 
@@ -34,11 +36,15 @@ def _run(cmd: list[str]) -> None:
 
 
 def cmd_footprints(args: argparse.Namespace) -> None:
+    all_states = bool(getattr(args, "all_states", False))
+    states = getattr(args, "states", None) or []
+    if not all_states and not states:
+        raise SystemExit("footprints: provide --states NAME [NAME ...] or --all-states")
+    if all_states and states:
+        raise SystemExit("footprints: use either --all-states or --states, not both")
     cmd = [
         sys.executable,
         str(SCRIPTS / "ingest_ms_buildings.py"),
-        "--states",
-        *args.states,
         "--min-sqft",
         str(args.min_sqft),
         "--max-per-state",
@@ -48,6 +54,10 @@ def cmd_footprints(args: argparse.Namespace) -> None:
         "--cache-dir",
         str(args.cache_dir),
     ]
+    if all_states:
+        cmd.append("--all-states")
+    else:
+        cmd.extend(["--states", *states])
     if args.force_download:
         cmd.append("--force-download")
     _run(cmd)
@@ -77,7 +87,8 @@ def main() -> None:
     sub = parser.add_subparsers(dest="command", required=True)
 
     p_fp = sub.add_parser("footprints", help="Download Microsoft US Building Footprints subset.")
-    p_fp.add_argument("--states", nargs="+", required=True)
+    p_fp.add_argument("--all-states", action="store_true", help="All 50 states + DC (omit --states).")
+    p_fp.add_argument("--states", nargs="*", default=None)
     p_fp.add_argument("--min-sqft", type=float, default=100_000.0)
     p_fp.add_argument("--max-per-state", type=int, default=150)
     p_fp.add_argument("--output", type=Path, default=BACKEND_ROOT / "data" / "buildings_microsoft.csv")
@@ -96,7 +107,8 @@ def main() -> None:
     p_pr.set_defaults(func=cmd_precip)
 
     p_all = sub.add_parser("all", help="Run footprints then precipitation.")
-    p_all.add_argument("--states", nargs="+", required=True)
+    p_all.add_argument("--all-states", action="store_true", help="All 50 states + DC for footprints.")
+    p_all.add_argument("--states", nargs="*", default=None, help="Subset of states for footprints (if not --all-states).")
     p_all.add_argument("--min-sqft", type=float, default=100_000.0)
     p_all.add_argument("--max-per-state", type=int, default=150)
     p_all.add_argument(
@@ -121,6 +133,7 @@ def main() -> None:
     def _all_impl(ns: argparse.Namespace) -> None:
         cmd_footprints(
             argparse.Namespace(
+                all_states=ns.all_states,
                 states=ns.states,
                 min_sqft=ns.min_sqft,
                 max_per_state=ns.max_per_state,

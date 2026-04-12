@@ -10,6 +10,7 @@ Pydantic API models live in ``models/``; this module is the relational schema on
 from __future__ import annotations
 
 from datetime import date, datetime
+from typing import Any
 
 from geoalchemy2 import Geometry
 from sqlalchemy import (
@@ -79,6 +80,11 @@ class CompanySustainabilityProfile(Base):
     has_science_based_target: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
     climate_risk_score: Mapped[float | None] = mapped_column(Float, nullable=True)
     esg_alignment_score: Mapped[float | None] = mapped_column(Float, nullable=True)
+    # Offline SBTi ingest + API provenance (see services/sbti_esg.py, scripts/ingest_sbti_csv.py)
+    esg_source: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    esg_confidence: Mapped[float | None] = mapped_column(Float, nullable=True)
+    sbti_ingested_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    esg_details: Mapped[dict[str, Any] | None] = mapped_column(JSONB, nullable=True)
 
     company: Mapped[Company] = relationship(back_populates="sustainability_profile")
 
@@ -116,6 +122,8 @@ class Building(Base):
     name: Mapped[str] = mapped_column(String, nullable=False)
     state_code: Mapped[str] = mapped_column(String(2), nullable=False, index=True)
     city: Mapped[str | None] = mapped_column(String, nullable=True)
+    county: Mapped[str | None] = mapped_column(String(256), nullable=True)
+    geocode_display_name: Mapped[str | None] = mapped_column(Text, nullable=True)
     roof_area_sqft: Mapped[float] = mapped_column(Float, nullable=False)
 
     company_id: Mapped[str | None] = mapped_column(
@@ -134,6 +142,15 @@ class Building(Base):
         Geometry("MULTIPOLYGON", srid=4326),
         nullable=True,
     )
+
+    # CV snapshot (never overwrites catalog roof_area_sqft / data_source)
+    roof_area_sqft_cv: Mapped[float | None] = mapped_column(Float, nullable=True)
+    roof_area_confidence_cv: Mapped[float | None] = mapped_column(Float, nullable=True)
+    cooling_tower_detected_cv: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    cooling_tower_confidence_cv: Mapped[float | None] = mapped_column(Float, nullable=True)
+    cv_inference_at: Mapped[object | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    cv_source: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    cv_inference_model: Mapped[str | None] = mapped_column(String(128), nullable=True)
 
     company: Mapped[Company | None] = relationship(back_populates="buildings")
     scores: Mapped["BuildingScore | None"] = relationship(

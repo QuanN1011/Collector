@@ -5,21 +5,23 @@ Requires DATABASE_URL and a running PostGIS instance (see docker-compose.yml).
 
 Data notes
 ----------
-- **Buildings:** default ``data/buildings.csv`` comes from ``generate_building_seed_csv.py`` with **synthetic**
-  square footprints. For **Microsoft US Building Footprints**, run ``ingest_ms_buildings.py`` or
-  ``ingest_real_data.py`` and pass ``--buildings-csv data/buildings_microsoft.csv`` (includes ``footprint_wkt``).
-  See ``docs/DATABASE_SEED_DATA.md``.
+- **Buildings:** default ``data/buildings_catalog.csv`` merges **Microsoft US Building Footprints** (preferred:
+  ``buildings_microsoft_nationwide.csv`` from ``ingest_ms_buildings.py --all-states``, else ``buildings_microsoft.csv``
+  or ``buildings_microsoft_tx_sample.csv``) with **synthetic** ``bru-*`` rows only for states **not** covered by
+  the Microsoft file (see ``merge_buildings_catalog.py --auto-exclude-synthetic``). Legacy ``data/buildings.csv``
+  is synthetic-only input. See ``docs/DATABASE_SEED_DATA.md``.
 - **State context:** default ``state_context.csv``; optional **rainfall** via ``ingest_state_precip_open_meteo.py``
   (Open-Meteo API). **Water price** is preserved from the merge file until you replace it from an authoritative source.
 - City water/wastewater/stormwater overrides live in ``services/seed_scoring.py``.
-- CV detections use the deterministic mock in ``ai.cooling_tower_detection`` plus scripted roof/obstruction rows.
+- CV seed rows use fixed placeholder tower values for demo table completeness; the prospecting API uses
+  ``ai.physical_pipeline`` (GEE + Gemini) and does not read these seed CV rows for scores.
 
 Usage (from backend/)::
 
   # DATABASE_URL in .env (see .env.example) or exported in the shell
   export DATABASE_URL=postgresql+psycopg://rainuse:rainuse@localhost:5432/rainuse
   python scripts/seed_database.py
-  python scripts/seed_database.py --buildings-csv data/buildings_microsoft.csv
+  python scripts/seed_database.py --buildings-csv data/buildings_catalog.csv
 
 """
 
@@ -44,7 +46,6 @@ from geoalchemy2.elements import WKTElement
 from sqlalchemy import delete, select
 from sqlalchemy.exc import OperationalError
 
-from ai.cooling_tower_detection import detect_cooling_tower
 from database.engine import get_session_factory, init_db
 from database.tables import (
     Building,
@@ -117,6 +118,9 @@ def _parse_opt_float(raw: str | None) -> float | None:
     return float(raw)
 
 
+from services.esg_profile_sync import company_sustainability_profile_from_csv_row as _sustain_profile_from_row
+
+
 def _load_csv(path: Path) -> list[dict[str, str]]:
     with path.open(newline="", encoding="utf-8") as f:
         return list(csv.DictReader(f))
@@ -133,7 +137,8 @@ def seed(
     SessionLocal = get_session_factory()
 
     sc_path = state_context_csv or (_DATA / "state_context.csv")
-    b_path = buildings_csv or (_DATA / "buildings.csv")
+    _catalog = _DATA / "buildings_catalog.csv"
+    b_path = buildings_csv or (_catalog if _catalog.is_file() else (_DATA / "buildings.csv"))
     co_path = companies_csv or (_DATA / "companies.csv")
     su_path = company_sustainability_csv or (_DATA / "company_sustainability_profiles.csv")
     do_path = company_documents_csv or (_DATA / "company_documents.csv")
@@ -146,15 +151,8 @@ def seed(
 
     company_sustain: dict[str, CompanySustainabilityProfile] = {}
     for row in sust_rows:
-        cid = row["company_id"].strip()
-        company_sustain[cid] = CompanySustainabilityProfile(
-            company_id=cid,
-            has_esg_report=_parse_bool(row.get("has_esg_report")),
-            has_water_target=_parse_bool(row.get("has_water_target")),
-            has_science_based_target=_parse_bool(row.get("has_science_based_target")),
-            climate_risk_score=_parse_opt_float(row.get("climate_risk_score")),
-            esg_alignment_score=_parse_opt_float(row.get("esg_alignment_score")),
-        )
+        p = _sustain_profile_from_row(row)
+        company_sustain[p.company_id] = p
 
     ctx_map: dict[str, StateContextRow] = {}
     for row in state_rows:
@@ -205,16 +203,7 @@ def seed(
             )
 
         for row in sust_rows:
-            session.add(
-                CompanySustainabilityProfile(
-                    company_id=row["company_id"].strip(),
-                    has_esg_report=_parse_bool(row.get("has_esg_report")),
-                    has_water_target=_parse_bool(row.get("has_water_target")),
-                    has_science_based_target=_parse_bool(row.get("has_science_based_target")),
-                    climate_risk_score=_parse_opt_float(row.get("climate_risk_score")),
-                    esg_alignment_score=_parse_opt_float(row.get("esg_alignment_score")),
-                )
-            )
+            session.add(_sustain_profile_from_row(row))
 
         for row in doc_rows:
             fd = row.get("filing_date") or ""
@@ -275,6 +264,8 @@ def seed(
                     name=row["name"].strip(),
                     state_code=st,
                     city=(row.get("city") or "").strip() or None,
+                    county=(row.get("county") or "").strip() or None,
+                    geocode_display_name=(row.get("geocode_display_name") or "").strip() or None,
                     roof_area_sqft=roof,
                     company_id=cid,
                     building_type=(row.get("building_type") or "").strip() or None,
@@ -296,7 +287,8 @@ def seed(
         for b in buildings:
             ctx = ctx_by_state[b.state_code]
             rainfall = ctx.rainfall_inches_annual
-            tower_ok, tower_conf = detect_cooling_tower(b.id)
+            # Placeholder for seed/demo CvDetection rows only (not used by GET /building enrichment).
+            tower_ok, tower_conf = False, 0.0
 
             w_kgal, ww_kgal, storm_mo = resolve_utility_rates(
                 b.state_code,
@@ -471,14 +463,21 @@ def seed(
     print(
         "Seed complete: state_context, companies (+ profiles, documents), buildings (PostGIS footprints), "
         "imagery_assets, cv_detections, physical_features, water_yield_estimates, utility_profiles, "
-        "policy_drivers, building_scores."
+        "policy_drivers, building_scores.\n"
+        "ESG: after changing company_sustainability_profiles.csv or fixing legacy DB rows, run "
+        "python scripts/refresh_esg_profiles.py && python scripts/verify_esg_profiles.py"
     )
 
 
 if __name__ == "__main__":
     p = argparse.ArgumentParser(description="Seed RainUSE Postgres from CSV fixtures + derived rows.")
     p.add_argument("--state-context-csv", type=Path, default=None, help="Default: data/state_context.csv")
-    p.add_argument("--buildings-csv", type=Path, default=None, help="Default: data/buildings.csv (use buildings_microsoft.csv after ingest_ms_buildings.py)")
+    p.add_argument(
+        "--buildings-csv",
+        type=Path,
+        default=None,
+        help="Default: data/buildings_catalog.csv if present, else data/buildings.csv",
+    )
     p.add_argument("--companies-csv", type=Path, default=None)
     p.add_argument("--company-sustainability-csv", type=Path, default=None)
     p.add_argument("--company-documents-csv", type=Path, default=None)

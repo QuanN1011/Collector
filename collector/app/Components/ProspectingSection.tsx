@@ -83,6 +83,9 @@ export default function ProspectingSection({ model }: { model: ProspectingModel 
               disabled={p.loadingBuildings || p.buildings.length === 0}
               className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-slate-950 outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 disabled:opacity-60"
             >
+              {p.buildings.length === 0 && !p.loadingBuildings && p.selectedState ? (
+                <option value="">No buildings loaded for this state</option>
+              ) : null}
               {p.buildings.map((b) => (
                 <option key={b.id} value={b.id}>
                   {b.name}
@@ -112,7 +115,9 @@ export default function ProspectingSection({ model }: { model: ProspectingModel 
           <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h3 className="text-lg font-semibold text-slate-950">Top prospects</h3>
-              <p className="text-sm text-slate-600">Sorted by viability score for the state you selected.</p>
+              <p className="text-sm text-slate-600">
+                Sorted by viability score for the state you selected (partial scores omit cooling tower when live CV is off).
+              </p>
             </div>
             <button
               type="button"
@@ -155,7 +160,11 @@ export default function ProspectingSection({ model }: { model: ProspectingModel 
                     <td className="px-4 py-3 text-slate-700">${row.annual_water_savings.toLocaleString()}</td>
                     <td className="px-4 py-3 text-slate-700">{row.physical_analysis.large_roof ? "Yes" : "No"}</td>
                     <td className="px-4 py-3 text-slate-700">
-                      {row.cooling_tower_detected ? `Yes (${(row.cooling_tower_confidence * 100).toFixed(0)}%)` : "No"}
+                      {row.physical_analysis.tower_status === "unavailable"
+                        ? "Unavailable"
+                        : row.cooling_tower_detected
+                          ? `Yes (${((row.cooling_tower_confidence ?? 0) * 100).toFixed(0)}%)`
+                          : `No (${((row.cooling_tower_confidence ?? 0) * 100).toFixed(0)}%)`}
                     </td>
                     <td className="px-4 py-3">
                       <button

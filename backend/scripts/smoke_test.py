@@ -8,6 +8,9 @@ Usage (from repo):
 
 Optional (live GEE + Gemini — slow, needs .env + credentials):
   RUN_LIVE_CV=1 python scripts/smoke_test.py
+
+Optional (requires DATABASE_URL; compares DB to canonical ESG CSV):
+  VERIFY_ESG_PROFILES=1 python scripts/smoke_test.py
 """
 
 from __future__ import annotations
@@ -43,6 +46,24 @@ def main() -> int:
             file=sys.stderr,
         )
         return 1
+
+    if os.environ.get("VERIFY_ESG_PROFILES") == "1" and get_database_url():
+        import subprocess
+
+        r = subprocess.run(
+            [sys.executable, str(_BACKEND / "scripts" / "verify_esg_profiles.py")],
+            cwd=str(_BACKEND),
+            env={**os.environ, "PYTHONPATH": str(_BACKEND)},
+        )
+        if r.returncode != 0:
+            print(
+                "VERIFY_ESG_PROFILES=1: company_sustainability_profiles vs canonical CSV failed "
+                f"(exit {r.returncode}). Run: python scripts/verify_esg_profiles.py [--fix]",
+                file=sys.stderr,
+            )
+            return r.returncode
+        print("OK  ESG profiles vs canonical CSV (VERIFY_ESG_PROFILES=1)\n")
+
     c = TestClient(app)
 
     r = c.get("/health")
@@ -80,7 +101,7 @@ def main() -> int:
     ):
         assert key in b0, f"missing {key}"
     pa = b0["physical_analysis"]
-    assert pa["vision_backend"] == "mock"
+    assert pa["vision_backend"] in ("none", "gemini_vision")
     assert "roof_catchment_provenance" in pa
     assert 0.0 <= pa["roof_confidence"] <= 1.0
     print(f"OK  GET /buildings?state=TX ({len(data)} buildings)")

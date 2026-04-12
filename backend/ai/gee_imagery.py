@@ -20,6 +20,13 @@ logger = logging.getLogger(__name__)
 
 _ee = None
 _ee_initialized = False
+# Set when ``ee.Initialize`` fails so callers can surface the real reason (e.g. IAM) in API payloads.
+_last_ee_init_error: str | None = None
+
+
+def last_earth_engine_init_error() -> str | None:
+    """Human-readable message from the last failed ``ee.Initialize``, or None if none / success."""
+    return _last_ee_init_error
 
 
 def _ensure_ee():
@@ -37,21 +44,27 @@ def _ensure_ee():
 
 
 def _init_ee() -> bool:
-    global _ee_initialized
+    global _ee_initialized, _last_ee_init_error
     if _ee_initialized:
         return True
+    _last_ee_init_error = None
     ee = _ensure_ee()
     if ee is None:
+        _last_ee_init_error = "earthengine-api import failed"
         return False
     settings = get_settings()
     if not settings.gee_project_id:
         logger.info("GEE_PROJECT_ID not set; skipping Earth Engine init")
+        _last_ee_init_error = "GEE_PROJECT_ID is not set"
         return False
     try:
         ee.Initialize(project=settings.gee_project_id)
         _ee_initialized = True
+        _last_ee_init_error = None
         return True
     except Exception as e:
+        msg = str(e).strip()
+        _last_ee_init_error = msg[:800] if msg else "Earth Engine Initialize failed"
         logger.warning("Earth Engine Initialize failed: %s", e)
         return False
 
