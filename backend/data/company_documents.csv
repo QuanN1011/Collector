@@ -1,0 +1,7 @@
+id,company_id,document_type,filing_date,source_url,excerpt
+doc-amzn-10k-2024,cmp-amzn,SEC_10K,2024-02-02,https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001018724,"Water stewardship and operational efficiency initiatives; facility-level conservation."
+doc-wmt-10k-2024,cmp-wmt,SEC_10K,2024-03-15,https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0000104169,"Sustainability accounting and water use in retail and distribution networks."
+doc-tsla-10k-2024,cmp-tsla,SEC_10K,2024-01-29,https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001318605,"Manufacturing water use and recycling at Gigafactory sites."
+doc-gm-10k-2024,cmp-gm,SEC_10K,2024-01-31,https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001467858,"Climate risk disclosures and water management in assembly plants."
+doc-intc-esg-2023,cmp-intc,ESG_REPORT,2023-05-12,https://www.intc.com,"Water conservation goals for fabrication and campus operations."
+doc-xom-climate-2024,cmp-xom,CLIMATE_REPORT,2024-04-01,https://www.exxonmobil.com,"Operational water management and reuse at large chemical complexes."

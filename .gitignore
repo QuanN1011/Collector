@@ -6,3 +6,15 @@ backend/**/__pycache__/
 backend/.docs
 
 
+
+# Root-level Node/Next artifacts (app lives in collector/)
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+
+# OS / editor
+.DS_Store
+backend/.env
+.env
+backend/data/cache/

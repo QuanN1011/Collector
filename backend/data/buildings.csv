@@ -1,18 +1,70 @@
-id,name,state,city,roof_area_sqft,latitude,longitude
-tx-dfw-001,North Texas Logistics Center,TX,Dallas,185000,32.8199,-96.8703
-tx-dfw-002,Mesquite Industrial Park Bldg 3,TX,Mesquite,42000,32.7668,-96.5992
-tx-aus-001,Austin Tech Campus Warehouse,TX,Austin,120000,30.3284,-97.6925
-tx-hou-001,Gulf Coast Manufacturing Hub,TX,Houston,95000,29.7499,-95.3584
-az-phx-001,Desert Distribution Center,AZ,Phoenix,135000,33.5722,-112.0891
-az-tuc-001,Sonora Components Plant,AZ,Tucson,78000,32.1542,-110.8787
-pa-phl-001,Delaware Valley Cold Storage,PA,Philadelphia,110000,39.9526,-75.1652
-ca-lax-001,Inland Empire Fulfillment,CA,Riverside,210000,33.9533,-117.3962
-ca-sjc-001,Silicon Valley Data Hall Annex,CA,San Jose,88000,37.3541,-121.9552
-fl-mia-001,South Florida Trade Plaza,FL,Miami,67000,25.7617,-80.1918
-ga-atl-001,Peachtree Industrial Complex,GA,Atlanta,142000,33.7490,-84.3880
-il-chi-001,Great Lakes Rail Transload,IL,Chicago,118000,41.8369,-87.6847
-oh-col-001,Buckeye Logistics Warehouse,OH,Columbus,56000,39.9612,-82.9988
-ny-buf-001,Western NY Industrial,NY,Buffalo,48000,42.8864,-78.8784
-wa-sea-001,Puget Sound Port Warehouse,WA,Seattle,99000,47.6062,-122.3321
-co-den-001,Front Range Industrial,CO,Denver,73000,39.7392,-104.9903
-nc-clt-001,Charlotte Regional DC,NC,Charlotte,105000,35.2271,-80.8431
+id,name,state,city,roof_area_sqft,latitude,longitude,company_id,building_type,land_use_type
+bru-tx-dallas-000,Dallas Regional Distribution Center 0,TX,Dallas,91163,32.805097,-96.904498,cmp-intc,manufacturing,logistics
+bru-tx-houston-001,Houston Industrial Park Building 1,TX,Houston,290878,29.688449,-95.307053,cmp-hd,distribution,industrial
+bru-tx-austin-002,Austin Manufacturing Campus 2,TX,Austin,310707,30.196865,-97.798815,cmp-gm,food_processing,industrial
+bru-tx-sanantonio-003,San Antonio Cold Storage Facility 3,TX,San Antonio,404255,29.410858,-98.538798,cmp-tsla,food_processing,commercial
+bru-tx-fortworth-004,Fort Worth Fulfillment Hub 4,TX,Fort Worth,367223,32.710017,-97.392631,cmp-fdx,distribution,commercial
+bru-tx-elpaso-005,El Paso Semiconductor Warehouse 5,TX,El Paso,311304,31.687409,-106.413551,cmp-wmt,food_processing,logistics
+bru-tx-mesquite-006,Mesquite Chemical Processing Annex 6,TX,Mesquite,127580,32.702469,-96.507095,cmp-ko,warehouse,logistics
+bru-tx-laredo-007,Laredo Food & Beverage Plant 7,TX,Laredo,331442,27.474612,-99.554698,cmp-ko,distribution,industrial
+bru-tx-corpuschristi-008,Corpus Christi Automotive Supplier Complex 8,TX,Corpus Christi,258694,27.865967,-97.426372,cmp-xom,manufacturing,commercial
+bru-tx-plano-009,Plano Logistics Cross-Dock 9,TX,Plano,345637,32.993949,-96.662561,cmp-tgt,manufacturing,logistics
+bru-az-phoenix-010,Phoenix Printing & Packaging Plant 10,AZ,Phoenix,232809,33.491243,-112.144051,cmp-intc,warehouse,industrial
+bru-az-tucson-011,Tucson Data Hall Support Building 11,AZ,Tucson,210409,32.171229,-111.072938,cmp-mu,distribution,industrial
+bru-az-mesa-012,Mesa Aerospace Components Plant 12,AZ,Mesa,96256,33.494365,-111.815220,cmp-gm,food_processing,commercial
+bru-az-chandler-013,Chandler Plastics Extrusion Facility 13,AZ,Chandler,150005,33.379243,-111.808573,cmp-ups,manufacturing,logistics
+bru-az-glendale-014,Glendale Metal Finishing Facility 14,AZ,Glendale,304605,33.551046,-112.242197,cmp-cvs,warehouse,industrial
+bru-az-scottsdale-015,Scottsdale Regional Distribution Center 15,AZ,Scottsdale,272731,33.579519,-112.009567,cmp-wmt,distribution,industrial
+bru-az-tempe-016,Tempe Industrial Park Building 16,AZ,Tempe,247756,33.452940,-111.875743,cmp-tgt,food_processing,commercial
+bru-az-peoria-017,Peoria Manufacturing Campus 17,AZ,Peoria,187995,33.597260,-112.247029,cmp-amzn,distribution,logistics
+bru-pa-philadelphia-018,Philadelphia Cold Storage Facility 18,PA,Philadelphia,369010,40.019262,-75.094807,cmp-pep,distribution,commercial
+bru-pa-pittsburgh-019,Pittsburgh Fulfillment Hub 19,PA,Pittsburgh,433836,40.428258,-80.000181,cmp-mu,manufacturing,logistics
+bru-pa-allentown-020,Allentown Semiconductor Warehouse 20,PA,Allentown,204456,40.674273,-75.388486,cmp-gm,manufacturing,commercial
+bru-pa-erie-021,Erie Chemical Processing Annex 21,PA,Erie,372519,42.177252,-80.081337,cmp-amzn,warehouse,commercial
+bru-pa-harrisburg-022,Harrisburg Food & Beverage Plant 22,PA,Harrisburg,407553,40.183506,-76.785598,cmp-ko,manufacturing,industrial
+bru-tx-dallas-023,Dallas Automotive Supplier Complex 23,TX,Dallas,127565,32.733357,-96.785181,,distribution,logistics
+bru-tx-houston-024,Houston Logistics Cross-Dock 24,TX,Houston,93466,29.807850,-95.441754,cmp-tsla,warehouse,logistics
+bru-tx-austin-025,Austin Printing & Packaging Plant 25,TX,Austin,174129,30.337038,-97.756910,cmp-gm,warehouse,commercial
+bru-tx-sanantonio-026,San Antonio Data Hall Support Building 26,TX,San Antonio,253335,29.509127,-98.457027,cmp-nke,distribution,industrial
+bru-tx-fortworth-027,Fort Worth Aerospace Components Plant 27,TX,Fort Worth,305908,32.700446,-97.365621,cmp-intc,manufacturing,industrial
+bru-tx-elpaso-028,El Paso Plastics Extrusion Facility 28,TX,El Paso,180130,31.682779,-106.461157,cmp-wmt,warehouse,industrial
+bru-tx-mesquite-029,Mesquite Metal Finishing Facility 29,TX,Mesquite,269895,32.772548,-96.648735,cmp-ups,food_processing,industrial
+bru-tx-laredo-030,Laredo Regional Distribution Center 30,TX,Laredo,166643,27.581231,-99.392351,cmp-fdx,food_processing,commercial
+bru-tx-corpuschristi-031,Corpus Christi Industrial Park Building 31,TX,Corpus Christi,355177,27.786244,-97.407255,cmp-fdx,distribution,commercial
+bru-tx-plano-032,Plano Manufacturing Campus 32,TX,Plano,138244,33.061078,-96.633870,cmp-gm,manufacturing,logistics
+bru-az-phoenix-033,Phoenix Cold Storage Facility 33,AZ,Phoenix,197491,33.440750,-112.087186,cmp-intc,distribution,commercial
+bru-az-tucson-034,Tucson Fulfillment Hub 34,AZ,Tucson,134268,32.275444,-110.891687,cmp-amzn,distribution,industrial
+bru-az-mesa-035,Mesa Semiconductor Warehouse 35,AZ,Mesa,174812,33.359936,-111.833159,cmp-cvs,distribution,industrial
+bru-az-chandler-036,Chandler Chemical Processing Annex 36,AZ,Chandler,91050,33.288215,-111.733232,cmp-nke,warehouse,commercial
+bru-az-glendale-037,Glendale Food & Beverage Plant 37,AZ,Glendale,374177,33.575386,-112.139289,,manufacturing,industrial
+bru-az-scottsdale-038,Scottsdale Automotive Supplier Complex 38,AZ,Scottsdale,302713,33.453407,-111.826884,cmp-wmt,warehouse,industrial
+bru-az-tempe-039,Tempe Logistics Cross-Dock 39,AZ,Tempe,421785,33.349026,-111.945107,cmp-tsla,distribution,logistics
+bru-az-peoria-040,Peoria Printing & Packaging Plant 40,AZ,Peoria,308262,33.504420,-112.309119,cmp-intc,food_processing,industrial
+bru-pa-philadelphia-041,Philadelphia Data Hall Support Building 41,PA,Philadelphia,302622,40.029487,-75.134671,cmp-wmt,distribution,commercial
+bru-pa-pittsburgh-042,Pittsburgh Aerospace Components Plant 42,PA,Pittsburgh,210729,40.468327,-79.975650,cmp-mu,manufacturing,logistics
+bru-pa-allentown-043,Allentown Plastics Extrusion Facility 43,PA,Allentown,238525,40.638915,-75.527489,cmp-ko,food_processing,commercial
+bru-pa-erie-044,Erie Metal Finishing Facility 44,PA,Erie,103260,42.207223,-79.994138,cmp-fdx,distribution,logistics
+bru-pa-harrisburg-045,Harrisburg Regional Distribution Center 45,PA,Harrisburg,426641,40.218368,-76.931656,cmp-tgt,manufacturing,commercial
+bru-tx-dallas-046,Dallas Industrial Park Building 46,TX,Dallas,290126,32.741298,-96.813599,cmp-ko,distribution,logistics
+bru-tx-houston-047,Houston Manufacturing Campus 47,TX,Houston,332186,29.817079,-95.404137,cmp-ups,warehouse,industrial
+bru-tx-austin-048,Austin Cold Storage Facility 48,TX,Austin,89788,30.340148,-97.686668,cmp-ko,manufacturing,logistics
+bru-tx-sanantonio-049,San Antonio Fulfillment Hub 49,TX,San Antonio,398519,29.391718,-98.448751,,warehouse,industrial
+bru-tx-fortworth-050,Fort Worth Semiconductor Warehouse 50,TX,Fort Worth,196838,32.676614,-97.346813,cmp-amzn,warehouse,industrial
+bru-tx-elpaso-051,El Paso Chemical Processing Annex 51,TX,El Paso,359431,31.784680,-106.542370,cmp-hd,distribution,industrial
+bru-tx-mesquite-052,Mesquite Food & Beverage Plant 52,TX,Mesquite,416375,32.693544,-96.515717,cmp-wmt,warehouse,logistics
+bru-tx-laredo-053,Laredo Automotive Supplier Complex 53,TX,Laredo,114640,27.539455,-99.475447,cmp-xom,distribution,commercial
+bru-tx-corpuschristi-054,Corpus Christi Logistics Cross-Dock 54,TX,Corpus Christi,135978,27.747814,-97.455103,cmp-hd,manufacturing,industrial
+bru-tx-plano-055,Plano Printing & Packaging Plant 55,TX,Plano,383770,33.085629,-96.595235,cmp-hd,distribution,industrial
+bru-az-phoenix-056,Phoenix Data Hall Support Building 56,AZ,Phoenix,425786,33.492582,-112.106919,cmp-intc,warehouse,industrial
+bru-az-tucson-057,Tucson Aerospace Components Plant 57,AZ,Tucson,405258,32.271727,-111.056219,,manufacturing,industrial
+bru-az-mesa-058,Mesa Plastics Extrusion Facility 58,AZ,Mesa,206817,33.476986,-111.838733,cmp-intc,manufacturing,industrial
+bru-az-chandler-059,Chandler Metal Finishing Facility 59,AZ,Chandler,197511,33.338806,-111.862337,cmp-tgt,warehouse,commercial
+bru-az-glendale-060,Glendale Regional Distribution Center 60,AZ,Glendale,99283,33.565467,-112.212071,cmp-pep,distribution,industrial
+bru-az-scottsdale-061,Scottsdale Industrial Park Building 61,AZ,Scottsdale,303206,33.557867,-111.982533,cmp-mu,distribution,industrial
+bru-az-tempe-062,Tempe Manufacturing Campus 62,AZ,Tempe,375250,33.447383,-111.973949,cmp-hd,distribution,commercial
+bru-az-peoria-063,Peoria Cold Storage Facility 63,AZ,Peoria,115535,33.651911,-112.308183,cmp-hd,distribution,logistics
+bru-pa-philadelphia-064,Philadelphia Fulfillment Hub 64,PA,Philadelphia,351800,40.026604,-75.141541,cmp-gm,warehouse,commercial
+bru-pa-pittsburgh-065,Pittsburgh Semiconductor Warehouse 65,PA,Pittsburgh,215570,40.362595,-79.953868,cmp-pep,distribution,logistics
+bru-pa-allentown-066,Allentown Chemical Processing Annex 66,PA,Allentown,333413,40.672008,-75.468433,cmp-pep,food_processing,logistics
+bru-pa-erie-067,Erie Food & Beverage Plant 67,PA,Erie,247156,42.093218,-80.171997,cmp-cvs,manufacturing,logistics
+bru-pa-harrisburg-068,Harrisburg Automotive Supplier Complex 68,PA,Harrisburg,391804,40.282439,-76.900663,cmp-ko,warehouse,industrial
