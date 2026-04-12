@@ -3,14 +3,10 @@
 import { useEffect, useState } from "react";
 
 export default function Header() {
-  const [isScrolled, setIsScrolled] = useState(false);
   const [backgroundType, setBackgroundType] = useState<'light' | 'dark' | 'gradient'>('light');
 
   useEffect(() => {
     const handleScroll = () => {
-      const scrollY = window.scrollY;
-      setIsScrolled(scrollY > 50);
-
       // Determine background type based on scroll position
       const sections = document.querySelectorAll('section');
       let currentBg: 'light' | 'dark' | 'gradient' = 'light';
@@ -70,8 +66,11 @@ export default function Header() {
 
           {/* Navigation */}
           <nav className="hidden items-center gap-8 md:flex">
-            <a href="#optimizer" className={`text-sm font-medium transition hover:opacity-80 ${getTextClasses()}`}>
-              Optimizer
+            <a href="#prospecting" className={`text-sm font-medium transition hover:opacity-80 ${getTextClasses()}`}>
+              Prospecting
+            </a>
+            <a href="#water-economics" className={`text-sm font-medium transition hover:opacity-80 ${getTextClasses()}`}>
+              Water economics
             </a>
             <a href="#features" className={`text-sm font-medium transition hover:opacity-80 ${getTextClasses()}`}>
               Features
