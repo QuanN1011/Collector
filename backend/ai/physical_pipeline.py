@@ -15,7 +15,7 @@ from threading import Lock
 from ai.gee_imagery import fetch_sentinel2_thumb_png
 from ai.gemini_vision import analyze_cooling_tower_from_image
 from models.building import BuildingRecord, PhysicalAnalysis
-from services.settings import get_settings
+from services.settings import get_settings, live_cv_enabled
 
 logger = logging.getLogger(__name__)
 
@@ -135,12 +135,12 @@ def _live_physical(record: BuildingRecord) -> PhysicalAnalysis:
 
 def get_physical_analysis(record: BuildingRecord, *, force_live: bool = False) -> PhysicalAnalysis:
     """
-    If force_live and settings.enable_live_cv, run GEE+Gemini (cached per building id).
+    If force_live and live CV is allowed (see ``live_cv_enabled``), run GEE+Gemini (cached per building id).
     Otherwise return fast mock (still uses catalog roof area and >100k flag).
     """
     settings = get_settings()
     key = record.id
-    if not force_live or not settings.enable_live_cv:
+    if not force_live or not live_cv_enabled(settings):
         return _mock_physical(record)
 
     with _cache_lock:

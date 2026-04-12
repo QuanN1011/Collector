@@ -3,25 +3,9 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-const STORAGE_KEY = "rainuse_api_key";
-
-const defaultApiBase = "http://127.0.0.1:8000";
-
-function apiBaseUrl() {
-  const u = process.env.NEXT_PUBLIC_API_URL;
-  return typeof u === "string" && u.length > 0 ? u.replace(/\/$/, "") : defaultApiBase;
-}
-
-function formatIssueError(status: number, data: { detail?: unknown }): string {
-  const d = data.detail;
-  if (typeof d === "string") return d;
-  if (Array.isArray(d)) {
-    return d
-      .map((item) => (typeof item === "object" && item && "msg" in item ? String((item as { msg: string }).msg) : JSON.stringify(item)))
-      .join("; ");
-  }
-  return `Issue failed (${status})`;
-}
+import { apiBaseUrl, API_KEY_STORAGE_KEY } from "@/lib/api";
+import { isAuth0Configured } from "@/lib/auth0Env";
+import { getIdTokenForApiKeyIssue, issueApiKeyWithIdToken } from "@/lib/issueApiKey";
 
 function CopyClipboardIcon({ className }: { className?: string }) {
   return (
@@ -42,7 +26,22 @@ function CopyClipboardIcon({ className }: { className?: string }) {
   );
 }
 
+/**
+ * Same API key issuance flow as `ApiKeySection` (`getIdTokenForApiKeyIssue` + `issueApiKeyWithIdToken`).
+ */
 export function SettingsMenu() {
+  if (!isAuth0Configured()) {
+    return (
+      <div className="pointer-events-auto rounded-lg border border-white/10 bg-slate-950/50 px-2 py-1.5 text-xs text-slate-500">
+        <span className="text-slate-400">API</span> {apiBaseUrl}
+      </div>
+    );
+  }
+
+  return <SettingsMenuInner />;
+}
+
+function SettingsMenuInner() {
   const { isAuthenticated, isLoading, user, getAccessTokenSilently } = useAuth0();
   const emailVerified = user?.email_verified === true;
   const [menuOpen, setMenuOpen] = useState(false);
@@ -92,41 +91,19 @@ export function SettingsMenu() {
     setCopyHint(null);
     setBusy(true);
     try {
-      const tokenOpts = {
-        detailedResponse: true as const,
-        authorizationParams: { scope: "openid profile email" },
-      };
-      let res = await getAccessTokenSilently(tokenOpts);
-      let idToken = (res as { id_token?: string }).id_token;
-      if (!idToken) {
-        res = await getAccessTokenSilently({
-          ...tokenOpts,
-          cacheMode: "off" as const,
-        });
-        idToken = (res as { id_token?: string }).id_token;
-      }
-      if (!idToken) {
-        setMessage("Could not read ID token. Try logging out and back in, or check Auth0 SPA settings.");
+      const token = await getIdTokenForApiKeyIssue(getAccessTokenSilently);
+      if (!token.ok) {
+        setMessage(token.error);
         return;
       }
-
-      const r = await fetch(`${apiBaseUrl()}/api/keys/issue`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${idToken}`,
-          Accept: "application/json",
-        },
-      });
-      const data = (await r.json().catch(() => ({}))) as { api_key?: string; detail?: unknown };
-      if (!r.ok) {
-        setMessage(formatIssueError(r.status, data));
+      const out = await issueApiKeyWithIdToken(token.idToken);
+      if (!out.ok) {
+        setMessage(out.error);
         return;
       }
-      if (data.api_key) {
-        localStorage.setItem(STORAGE_KEY, data.api_key);
-        setGeneratedKey(data.api_key);
-        setMessage("API key generated. Use the copy control to copy it.");
-      }
+      localStorage.setItem(API_KEY_STORAGE_KEY, out.api_key);
+      setGeneratedKey(out.api_key);
+      setMessage("API key generated. Use the copy control to copy it.");
     } catch (e) {
       setMessage(e instanceof Error ? e.message : "Could not generate API key.");
     } finally {
@@ -212,7 +189,7 @@ export function SettingsMenu() {
             </>
           )}
           {message ? <p className="mt-2 text-xs text-slate-300">{message}</p> : null}
-          <p className="mt-3 border-t border-white/10 pt-2 text-[11px] text-slate-500">API: {apiBaseUrl()}</p>
+          <p className="mt-3 border-t border-white/10 pt-2 text-[11px] text-slate-500">API: {apiBaseUrl}</p>
         </div>
       </details>
     </div>

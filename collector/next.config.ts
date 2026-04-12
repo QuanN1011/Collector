@@ -1,9 +1,13 @@
 import type { NextConfig } from "next";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+/** Directory containing this file (the Next app root), not `process.cwd()` — avoids Turbopack 500s when `npm run dev` is launched from the repo root. */
+const collectorRoot = path.dirname(fileURLToPath(import.meta.url));
 
 const nextConfig: NextConfig = {
-  // When the repo root also has package-lock.json, point Turbopack at this app (must match `npm run dev` cwd).
   turbopack: {
-    root: process.cwd(),
+    root: collectorRoot,
   },
 };
 

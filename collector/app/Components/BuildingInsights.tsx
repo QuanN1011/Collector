@@ -3,7 +3,6 @@
 import type { BuildingEnriched } from "../../lib/types";
 
 const BREAKDOWN_LABELS: Record<string, string> = {
-  roof: "Roof area fit",
   rainfall: "Rainfall",
   water_price: "Water price",
   cooling_tower: "Cooling tower signal",

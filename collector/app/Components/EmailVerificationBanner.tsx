@@ -2,7 +2,16 @@
 
 import { useAuth0 } from "@auth0/auth0-react";
 
+import { isAuth0Configured } from "@/lib/auth0Env";
+
 export function EmailVerificationBanner() {
+  if (!isAuth0Configured()) {
+    return null;
+  }
+  return <EmailVerificationBannerInner />;
+}
+
+function EmailVerificationBannerInner() {
   const { isAuthenticated, isLoading, user } = useAuth0();
 
   if (isLoading || !isAuthenticated || !user) {

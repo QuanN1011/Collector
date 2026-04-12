@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { AuthBar } from "@/app/Components/AuthBar";
+import { AuthBar } from "./Components/AuthBar";
 import { EmailVerificationBanner } from "@/app/Components/EmailVerificationBanner";
 import { SettingsMenu } from "@/app/Components/SettingsMenu";
 import InteractiveTopUI from "./Components/InteractiveTopUI";
@@ -9,6 +9,7 @@ import Header from "./Components/Header";
 import Footer from "./Components/Footer";
 import ProspectingSection from "./Components/ProspectingSection";
 import WaterEconomicsSection from "./Components/WaterEconomicsSection";
+import { ApiKeySection } from "./Components/ApiKeySection";
 import { useProspecting } from "../lib/useProspecting";
 
 function HeroLines() {
@@ -72,7 +73,7 @@ export default function Home() {
       {/* Hero Section */}
       <section className="relative min-h-screen overflow-hidden pt-20">
         <InteractiveTopUI />
-        <div className="absolute inset-0 bg-gradient-to-b from-white/60 via-white/40 to-slate-50/40" style={{ zIndex: 1 }} />
+        <div className="absolute inset-0 z-[1] bg-gradient-to-b from-white/60 via-white/40 to-slate-50/40" />
 
         <main className="relative z-10 mx-auto flex flex-col gap-6 px-6 sm:px-10 lg:px-16 pt-8">
           {/* Hero Section */}
@@ -249,6 +250,8 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      <ApiKeySection />
 
       <Footer />
     </div>

@@ -1,15 +1,33 @@
 """Environment-driven flags for Earth Engine + Gemini (optional for local dev)."""
 
+import os
 from functools import lru_cache
 
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
+def live_cv_enabled(settings: "Settings") -> bool:
+    """
+    Whether the live GEE + Gemini path is allowed when the client sends ``live_cv=true``.
+
+    - ``ENABLE_LIVE_CV=false`` / ``0`` / ``off`` → never live (stay on mock).
+    - ``ENABLE_LIVE_CV=true`` / ``1`` / ``on`` → allow live (still needs credentials to succeed).
+    - Unset or empty → **auto**: allow live when both ``GEMINI_API_KEY`` and ``GEE_PROJECT_ID`` are set.
+    """
+    raw = os.environ.get("ENABLE_LIVE_CV")
+    if raw is not None and raw.strip() != "":
+        v = raw.strip().lower()
+        if v in ("0", "false", "no", "off"):
+            return False
+        if v in ("1", "true", "yes", "on"):
+            return True
+    return bool(settings.gemini_api_key and settings.gee_project_id)
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
-    enable_live_cv: bool = Field(default=False, description="If true, allows GEE+Gemini when keys are set")
     gee_project_id: str | None = Field(default=None, description="Google Cloud / Earth Engine project id")
     gemini_api_key: str | None = Field(default=None, description="Google AI Studio / Gemini API key")
     gemini_model: str = Field(default="gemini-2.0-flash")
