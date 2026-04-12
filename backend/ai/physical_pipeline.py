@@ -52,13 +52,36 @@ def _mock_tower(building_id: str) -> tuple[bool, float]:
     return detected, round(confidence, 2)
 
 
+def _roof_lineage(record: BuildingRecord) -> tuple[float, str]:
+    """
+    Confidence and provenance for **catalog** roof catchment (not vision-segmented).
+
+    Higher confidence when area comes from surveyed footprints (e.g. Microsoft Buildings);
+    lower for synthetic demo seeds (square footprint derived from area only).
+    """
+    ds = (record.data_source or "").strip().lower()
+    if ds == "microsoft_us_building_footprints" or "microsoft" in ds:
+        return 0.88, "microsoft_us_building_footprints"
+    if ds == "synthetic_commercial_seed":
+        return 0.72, "synthetic_commercial_seed"
+    if ds == "synthetic_polygon_from_area":
+        return 0.74, "synthetic_polygon_from_area"
+    if record.id.startswith("bru-"):
+        return 0.72, "synthetic_commercial_seed"
+    if record.has_footprint_polygon:
+        return 0.84, "catalog_polygon_footprint"
+    return 0.68, "catalog_area_only"
+
+
 def _mock_physical(record: BuildingRecord) -> PhysicalAnalysis:
     catchment = float(record.roof_area_sqft)
     tower_ok, tower_conf = _mock_tower(record.id)
+    roof_conf, provenance = _roof_lineage(record)
     return PhysicalAnalysis(
         roof_catchment_sqft=catchment,
         large_roof=catchment >= 100_000,
-        roof_confidence=0.72,
+        roof_confidence=roof_conf,
+        roof_catchment_provenance=provenance,
         cooling_tower_detected=tower_ok,
         cooling_tower_confidence=tower_conf,
         imagery_source="none",
@@ -69,6 +92,7 @@ def _mock_physical(record: BuildingRecord) -> PhysicalAnalysis:
 def _live_physical(record: BuildingRecord) -> PhysicalAnalysis:
     catchment = float(record.roof_area_sqft)
     large = catchment >= 100_000
+    roof_conf, provenance = _roof_lineage(record)
 
     if record.latitude is None or record.longitude is None:
         return _mock_physical(record)
@@ -80,7 +104,8 @@ def _live_physical(record: BuildingRecord) -> PhysicalAnalysis:
         p = _mock_physical(record)
         return p.model_copy(
             update={
-                "roof_confidence": 0.68,
+                "roof_confidence": round(max(0.0, roof_conf - 0.04), 2),
+                "roof_catchment_provenance": provenance,
                 "vision_backend": "mock",
                 "imagery_source": "none",
             }
@@ -96,12 +121,11 @@ def _live_physical(record: BuildingRecord) -> PhysicalAnalysis:
         vision_backend = "gemini_vision"
         tower_note_conf = tower_conf
 
-    roof_conf = min(0.95, 0.78 + 0.17)
-
     return PhysicalAnalysis(
         roof_catchment_sqft=catchment,
         large_roof=large,
-        roof_confidence=round(roof_conf, 2),
+        roof_confidence=roof_conf,
+        roof_catchment_provenance=provenance,
         cooling_tower_detected=tower_ok,
         cooling_tower_confidence=round(max(0.0, min(1.0, tower_note_conf)), 2),
         imagery_source="COPERNICUS/S2_SR_HARMONIZED",

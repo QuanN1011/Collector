@@ -34,6 +34,23 @@ def main() -> int:
     assert r.status_code == 200, r.text
     print("OK  GET /health")
 
+    r = c.get("/states")
+    assert r.status_code == 200, r.text
+    st_payload = r.json()
+    assert "states" in st_payload
+    states = st_payload["states"]
+    for need in ("TX", "AZ", "PA"):
+        assert need in states, f"expected {need} in /states, got {states!r}"
+    print(f"OK  GET /states ({len(states)} states with buildings)")
+
+    r = c.get("/buildings?state=TEX")
+    assert r.status_code == 400, r.text
+    print("OK  GET /buildings?state=TEX -> 400 (invalid code)")
+
+    r = c.get("/buildings?state=ZZ")
+    assert r.status_code == 400, r.text
+    print("OK  GET /buildings?state=ZZ -> 400 (no state context)")
+
     r = c.get("/buildings?state=TX")
     assert r.status_code == 200, r.text
     data = r.json()
@@ -49,12 +66,24 @@ def main() -> int:
         assert key in b0, f"missing {key}"
     pa = b0["physical_analysis"]
     assert pa["vision_backend"] == "mock"
+    assert "roof_catchment_provenance" in pa
+    assert 0.0 <= pa["roof_confidence"] <= 1.0
     print(f"OK  GET /buildings?state=TX ({len(data)} buildings)")
+
+    r = c.get("/buildings?state=AZ")
+    assert r.status_code == 200, r.text
+    az = r.json()
+    assert len(az) >= 1
+    print(f"OK  GET /buildings?state=AZ ({len(az)} buildings)")
 
     bid = b0["id"]
     r = c.get(f"/building/{bid}")
     assert r.status_code == 200, r.text
     print(f"OK  GET /building/{bid}")
+
+    r = c.get("/building/does-not-exist-99999")
+    assert r.status_code == 404, r.text
+    print("OK  GET /building/does-not-exist-99999 -> 404")
 
     r = c.get("/top-prospects?state=TX&limit=3")
     assert r.status_code == 200, r.text
