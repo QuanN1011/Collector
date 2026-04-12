@@ -4,3 +4,4 @@ backend/**/__pycache__/
 *.py[cod]
 backend/.env
 .env
+backend/data/cache/

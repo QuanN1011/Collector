@@ -141,6 +141,8 @@ This replaces ad hoc “run this SQL once” instructions and avoids drift betwe
 
 **Schema changes:** edit `database/tables.py`, then from `backend/` run `alembic revision --autogenerate -m "short description"` (review the generated file, especially geometry columns), then `alembic upgrade head`.
 
+**Fixture data lineage:** which fields come from CSVs, which are inferred in code, and how that relates to external source *categories* (PRISM-style rainfall, building-footprint intent, etc.)—see [`DATABASE_SEED_DATA.md`](DATABASE_SEED_DATA.md).
+
 ---
 
 *Last updated to match team decisions for RainUSE Nexus hackathon scope.*
