@@ -1,6 +1,20 @@
 export default function Footer() {
   return (
     <footer className="relative mt-20 bg-slate-50 border-t border-slate-200/50">
+      <style dangerouslySetInnerHTML={{__html: `
+        @keyframes gentle-shake {
+          0% { transform: rotate(0deg); }
+          15% { transform: rotate(-5deg) scale(1.08); }
+          30% { transform: rotate(4deg) scale(1.1); }
+          45% { transform: rotate(-4deg) scale(1.08); }
+          60% { transform: rotate(3deg) scale(1.05); }
+          75% { transform: rotate(-2deg) scale(1.02); }
+          100% { transform: rotate(0deg) scale(1); }
+        }
+        .footer-logo-hover:hover {
+          animation: gentle-shake 1s ease-in-out;
+        }
+      `}} />
       {/* Glassmorphism overlay */}
       <div className="absolute inset-0 bg-white/60 backdrop-blur-sm" />
 
@@ -9,10 +23,12 @@ export default function Footer() {
           {/* Brand */}
           <div className="md:col-span-2">
             <div className="flex items-center gap-3 mb-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-950 text-white shadow-lg">
-                <span className="text-lg font-bold">C</span>
-              </div>
-              <span className="text-xl font-bold uppercase tracking-wide text-slate-950">
+              <img
+                src="/bucket.svg"
+                alt="Collector"
+                className="h-10 w-10 object-contain footer-logo-hover transition-transform duration-700 ease-in-out"
+              />
+              <span className="text-xl font-bold uppercase tracking-wide text-[#3e3d3c]">
                 Collector
               </span>
             </div>
@@ -23,21 +39,21 @@ export default function Footer() {
 
           {/* Product */}
           <div>
-            <h3 className="font-semibold text-slate-950 mb-4">Product</h3>
+            <h3 className="font-semibold text-[#3e3d3c] mb-4">Product</h3>
             <ul className="space-y-2 text-sm text-slate-600">
-              <li><a href="#optimizer" className="hover:text-slate-950 transition">Pumping Optimizer</a></li>
-              <li><a href="#features" className="hover:text-slate-950 transition">Features</a></li>
-              <li><a href="#about" className="hover:text-slate-950 transition">Platform</a></li>
+              <li><a href="#optimizer" className="hover:text-[#3e3d3c] transition">Pumping Optimizer</a></li>
+              <li><a href="#features" className="hover:text-[#3e3d3c] transition">Features</a></li>
+              <li><a href="#about" className="hover:text-[#3e3d3c] transition">Platform</a></li>
             </ul>
           </div>
 
           {/* Company */}
           <div>
-            <h3 className="font-semibold text-slate-950 mb-4">Company</h3>
+            <h3 className="font-semibold text-[#3e3d3c] mb-4">Company</h3>
             <ul className="space-y-2 text-sm text-slate-600">
-              <li><a href="#" className="hover:text-slate-950 transition">About</a></li>
-              <li><a href="#" className="hover:text-slate-950 transition">Contact</a></li>
-              <li><a href="#" className="hover:text-slate-950 transition">Privacy</a></li>
+              <li><a href="#" className="hover:text-[#3e3d3c] transition">About</a></li>
+              <li><a href="#" className="hover:text-[#3e3d3c] transition">Contact</a></li>
+              <li><a href="#" className="hover:text-[#3e3d3c] transition">Privacy</a></li>
             </ul>
           </div>
         </div>
@@ -47,9 +63,9 @@ export default function Footer() {
             © 2024 Collector. All rights reserved.
           </p>
           <div className="flex items-center gap-6 text-sm text-slate-500">
-            <a href="#" className="hover:text-slate-950 transition">Terms</a>
-            <a href="#" className="hover:text-slate-950 transition">Privacy</a>
-            <a href="#" className="hover:text-slate-950 transition">Support</a>
+            <a href="#" className="hover:text-[#3e3d3c] transition">Terms</a>
+            <a href="#" className="hover:text-[#3e3d3c] transition">Privacy</a>
+            <a href="#" className="hover:text-[#3e3d3c] transition">Support</a>
           </div>
         </div>
       </div>

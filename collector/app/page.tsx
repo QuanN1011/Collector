@@ -179,7 +179,7 @@ export default function Home() {
         : 0;
 
   return (
-    <div className="relative overflow-x-hidden bg-white text-slate-950">
+    <div className="relative overflow-x-hidden bg-white text-[#3e3d3c]">
       <Header navOpacity={navOpacity} />
 
       {/* Hero Section */}
@@ -232,7 +232,7 @@ export default function Home() {
               <p className="inline-flex rounded-full bg-cyan-500/10 px-4 py-2 text-sm font-semibold uppercase tracking-[0.28em] text-cyan-700">
                 Rainwater + system intelligence
               </p>
-              <h1 className="text-5xl font-semibold tracking-tight text-slate-950 sm:text-6xl">
+              <h1 className="text-5xl font-semibold tracking-tight text-[#3e3d3c] sm:text-6xl">
                 Modern water systems, smarter management.
               </h1>
               <p className="mx-auto max-w-2xl text-base leading-8 text-slate-700 sm:text-lg">
@@ -243,13 +243,13 @@ export default function Home() {
             <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center reveal" data-reveal>
               <a
                 href="#optimizer"
-                className="inline-flex items-center justify-center rounded-full bg-slate-950 px-8 py-4 text-sm font-semibold text-white shadow-lg shadow-slate-900/10 transition hover:bg-slate-800"
+                className="inline-flex items-center justify-center rounded-full bg-[#3e3d3c] px-8 py-4 text-sm font-semibold text-white shadow-lg shadow-[#3e3d3c]/10 transition hover:bg-[#2c2b2a]"
               >
                 Try optimizer
               </a>
               <a
                 href="#features"
-                className="inline-flex items-center justify-center rounded-full border border-slate-300 bg-white px-8 py-4 text-sm font-semibold text-slate-950 transition hover:border-slate-400"
+                className="inline-flex items-center justify-center rounded-full border border-slate-300 bg-white px-8 py-4 text-sm font-semibold text-[#3e3d3c] transition hover:border-slate-400"
               >
                 Learn more
               </a>
@@ -259,7 +259,7 @@ export default function Home() {
       </section>
 
       {/* Full Screen Scroll Video Section */}
-      <div className="relative w-full" ref={videoScrollContainerRef} style={{ height: '200vh', marginTop: '-27.5rem', marginBottom: '-100vh' }}>
+      <div className="relative z-20 w-full" ref={videoScrollContainerRef} style={{ height: '200vh', marginTop: '-27.5rem', marginBottom: '-100vh' }}>
         <div className="sticky top-0 h-screen w-full overflow-hidden">
           <div 
             className="absolute inset-0 flex items-center justify-center"
@@ -269,6 +269,7 @@ export default function Home() {
           >
             <div 
               className="relative overflow-hidden bg-black will-change-transform"
+              data-cursor-theme="light"
               style={{
                 width: `calc(82vw + ${Math.min(1, videoProgress * 7)} * 18vw)`,
                 height: `calc(82vh + ${Math.min(1, videoProgress * 7)} * 18vh)`,
@@ -293,7 +294,7 @@ export default function Home() {
             <p className="inline-flex rounded-full bg-cyan-500/10 px-4 py-2 text-sm font-semibold uppercase tracking-[0.28em] text-cyan-700 mx-auto">
               Pumping Optimizer
             </p>
-            <h2 className="text-4xl font-semibold tracking-tight text-slate-950 sm:text-5xl">
+            <h2 className="text-4xl font-semibold tracking-tight text-[#3e3d3c] sm:text-5xl">
               Design your system with confidence.
             </h2>
             <p className="mx-auto max-w-2xl text-slate-700">
@@ -308,7 +309,7 @@ export default function Home() {
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Backend building data</p>
-                    <p className="mt-2 text-base font-semibold text-slate-950">
+                    <p className="mt-2 text-base font-semibold text-[#3e3d3c]">
                       {loading ? "Loading building data…" : backendError ? "Failed to load values" : backendBuilding?.name ?? "No building selected"}
                     </p>
                   </div>
@@ -320,15 +321,15 @@ export default function Home() {
                   <div className="mt-4 grid gap-3 sm:grid-cols-3">
                     <div className="rounded-3xl bg-white p-3 border border-slate-100">
                       <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Roof area</p>
-                      <p className="mt-2 text-sm font-semibold text-slate-950">{backendBuilding.roof_area_sqft.toLocaleString()} sqft</p>
+                      <p className="mt-2 text-sm font-semibold text-[#3e3d3c]">{backendBuilding.roof_area_sqft.toLocaleString()} sqft</p>
                     </div>
                     <div className="rounded-3xl bg-white p-3 border border-slate-100">
                       <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Annual capture</p>
-                      <p className="mt-2 text-sm font-semibold text-slate-950">{Math.round(backendBuilding.rainwater_potential_gallons).toLocaleString()} gal</p>
+                      <p className="mt-2 text-sm font-semibold text-[#3e3d3c]">{Math.round(backendBuilding.rainwater_potential_gallons).toLocaleString()} gal</p>
                     </div>
                     <div className="rounded-3xl bg-white p-3 border border-slate-100">
                       <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Water cost</p>
-                      <p className="mt-2 text-sm font-semibold text-slate-950">${backendBuilding.water_price_per_1000_gal_usd.toFixed(2)}/1000 gal</p>
+                      <p className="mt-2 text-sm font-semibold text-[#3e3d3c]">${backendBuilding.water_price_per_1000_gal_usd.toFixed(2)}/1000 gal</p>
                     </div>
                   </div>
                 )}
@@ -336,19 +337,19 @@ export default function Home() {
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <label className="space-y-2 rounded-2xl bg-slate-50 p-4 text-sm text-slate-700 border border-slate-200">
-                  <span className="font-semibold text-slate-950">Daily volume</span>
+                  <span className="font-semibold text-[#3e3d3c]">Daily volume</span>
                   <input
                     type="number"
                     value={dailyVolume}
                     onChange={(event) => setDailyVolume(Number(event.target.value))}
-                    className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-950 outline-none transition focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
+                    className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-[#3e3d3c] outline-none transition focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
                     min={10}
                   />
                   <p className="text-xs text-slate-500">m³ per day</p>
                 </label>
 
                 <label className="space-y-2 rounded-2xl bg-slate-50 p-4 text-sm text-slate-700 border border-slate-200">
-                  <span className="font-semibold text-slate-950">Pump efficiency</span>
+                  <span className="font-semibold text-[#3e3d3c]">Pump efficiency</span>
                   <input
                     type="range"
                     min={30}
@@ -364,34 +365,34 @@ export default function Home() {
                 </label>
 
                 <label className="space-y-2 rounded-2xl bg-slate-50 p-4 text-sm text-slate-700 border border-slate-200">
-                  <span className="font-semibold text-slate-950">Source elevation</span>
+                  <span className="font-semibold text-[#3e3d3c]">Source elevation</span>
                   <input
                     type="number"
                     value={sourceElevation}
                     onChange={(event) => setSourceElevation(Number(event.target.value))}
-                    className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-950 outline-none transition focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
+                    className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-[#3e3d3c] outline-none transition focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
                   />
                   <p className="text-xs text-slate-500">meters</p>
                 </label>
 
                 <label className="space-y-2 rounded-2xl bg-slate-50 p-4 text-sm text-slate-700 border border-slate-200">
-                  <span className="font-semibold text-slate-950">Destination elevation</span>
+                  <span className="font-semibold text-[#3e3d3c]">Destination elevation</span>
                   <input
                     type="number"
                     value={destinationElevation}
                     onChange={(event) => setDestinationElevation(Number(event.target.value))}
-                    className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-950 outline-none transition focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
+                    className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-[#3e3d3c] outline-none transition focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
                   />
                   <p className="text-xs text-slate-500">meters</p>
                 </label>
 
                 <label className="space-y-2 rounded-2xl bg-slate-50 p-4 text-sm text-slate-700 border border-slate-200 sm:col-span-2">
-                  <span className="font-semibold text-slate-950">Pipeline length</span>
+                  <span className="font-semibold text-[#3e3d3c]">Pipeline length</span>
                   <input
                     type="number"
                     value={pipeLength}
                     onChange={(event) => setPipeLength(Number(event.target.value))}
-                    className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-950 outline-none transition focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
+                    className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-[#3e3d3c] outline-none transition focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
                     min={0.1}
                     step={0.1}
                   />
@@ -408,7 +409,7 @@ export default function Home() {
                   Use Suggested Pump Count
                 </button>
                 <div className="rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-700">
-                  <div className="flex items-center justify-between text-slate-950 font-semibold">
+                  <div className="flex items-center justify-between text-[#3e3d3c] font-semibold">
                     <span>Selected pumps</span>
                     <span>{pumpCount}</span>
                   </div>
@@ -428,35 +429,35 @@ export default function Home() {
             <div className="space-y-6 rounded-[2rem] border border-slate-200 bg-white p-8 shadow-[0_20px_60px_rgba(15,23,42,0.06)] sm:p-10">
               <div className="space-y-4">
                 <div className="rounded-2xl bg-slate-50 p-5 border border-slate-200">
-                  <h3 className="text-lg font-semibold text-slate-950">Optimization summary</h3>
+                  <h3 className="text-lg font-semibold text-[#3e3d3c]">Optimization summary</h3>
                   <p className="mt-2 text-sm text-slate-600">Estimated metrics for your configuration.</p>
                 </div>
                 <div className="grid gap-4 text-sm">
                   <div className="rounded-2xl bg-gradient-to-br from-cyan-50 to-cyan-50 border border-cyan-200 p-5">
                     <p className="text-xs uppercase tracking-[0.18em] text-cyan-700">Flow</p>
-                    <p className="mt-3 text-3xl font-semibold text-slate-950">{formatNumber(estimate.flowLps, 2)} <span className="text-lg text-slate-600">L/s</span></p>
+                    <p className="mt-3 text-3xl font-semibold text-[#3e3d3c]">{formatNumber(estimate.flowLps, 2)} <span className="text-lg text-slate-600">L/s</span></p>
                   </div>
                   <div className="rounded-2xl bg-slate-50 border border-slate-200 p-5">
                     <p className="text-xs uppercase tracking-[0.18em] text-slate-600">Total head</p>
-                    <p className="mt-3 text-3xl font-semibold text-slate-950">{formatNumber(estimate.head, 1)} <span className="text-lg text-slate-600">m</span></p>
+                    <p className="mt-3 text-3xl font-semibold text-[#3e3d3c]">{formatNumber(estimate.head, 1)} <span className="text-lg text-slate-600">m</span></p>
                   </div>
                   <div className="rounded-2xl bg-slate-50 border border-slate-200 p-5">
                     <p className="text-xs uppercase tracking-[0.18em] text-slate-600">Installed power</p>
-                    <p className="mt-3 text-3xl font-semibold text-slate-950">{formatNumber(estimate.powerKw, 2)} <span className="text-lg text-slate-600">kW</span></p>
+                    <p className="mt-3 text-3xl font-semibold text-[#3e3d3c]">{formatNumber(estimate.powerKw, 2)} <span className="text-lg text-slate-600">kW</span></p>
                   </div>
                   <div className="rounded-2xl bg-slate-50 border border-slate-200 p-5">
                     <p className="text-xs uppercase tracking-[0.18em] text-slate-600">Daily energy</p>
-                    <p className="mt-3 text-3xl font-semibold text-slate-950">{formatNumber(estimate.energyKwh, 1)} <span className="text-lg text-slate-600">kWh</span></p>
+                    <p className="mt-3 text-3xl font-semibold text-[#3e3d3c]">{formatNumber(estimate.energyKwh, 1)} <span className="text-lg text-slate-600">kWh</span></p>
                   </div>
                   <div className="rounded-2xl bg-gradient-to-br from-green-50 to-green-50 border border-green-200 p-5">
                     <p className="text-xs uppercase tracking-[0.18em] text-green-700">Daily cost</p>
-                    <p className="mt-3 text-3xl font-semibold text-slate-950">${formatNumber(estimate.costPerDay, 2)}</p>
+                    <p className="mt-3 text-3xl font-semibold text-[#3e3d3c]">${formatNumber(estimate.costPerDay, 2)}</p>
                   </div>
                 </div>
               </div>
 
               <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 text-sm text-slate-700">
-                <h4 className="font-semibold text-slate-950">Notes</h4>
+                <h4 className="font-semibold text-[#3e3d3c]">Notes</h4>
                 <ul className="mt-4 space-y-3 list-disc pl-5 text-slate-600 text-xs">
                   <li>Elevation gain calculated from destination minus source.</li>
                   <li>Friction allowance added for pipeline length.</li>
@@ -473,7 +474,7 @@ export default function Home() {
       <section id="features" className="relative py-20 px-6 sm:px-10 lg:px-16 bg-white">
         <div className="mx-auto max-w-6xl">
           <div className="mb-12 space-y-4 text-center reveal" data-reveal>
-            <h2 className="text-4xl font-semibold tracking-tight text-slate-950 sm:text-5xl">
+            <h2 className="text-4xl font-semibold tracking-tight text-[#3e3d3c] sm:text-5xl">
               Why Collector
             </h2>
           </div>
@@ -481,7 +482,7 @@ export default function Home() {
           <div className="grid gap-6 md:grid-cols-3 reveal" data-reveal>
             <div className="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-[0_20px_60px_rgba(15,23,42,0.06)]">
               <p className="text-xs uppercase tracking-[0.28em] text-slate-500">Streamline</p>
-              <h3 className="mt-4 text-xl font-semibold text-slate-950">Rainwater capture planning</h3>
+              <h3 className="mt-4 text-xl font-semibold text-[#3e3d3c]">Rainwater capture planning</h3>
               <p className="mt-3 text-sm leading-7 text-slate-600">
                 Design collection systems with confidence using rainfall analytics and roof area forecasts.
               </p>
@@ -489,7 +490,7 @@ export default function Home() {
 
             <div className="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-[0_20px_60px_rgba(15,23,42,0.06)]">
               <p className="text-xs uppercase tracking-[0.28em] text-slate-500">Optimize</p>
-              <h3 className="mt-4 text-xl font-semibold text-slate-950">Pump & energy forecasting</h3>
+              <h3 className="mt-4 text-xl font-semibold text-[#3e3d3c]">Pump & energy forecasting</h3>
               <p className="mt-3 text-sm leading-7 text-slate-600">
                 Balance head, flow, and efficiency in an intuitive model that speaks to teams and operators alike.
               </p>
@@ -497,7 +498,7 @@ export default function Home() {
 
             <div className="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-[0_20px_60px_rgba(15,23,42,0.06)]">
               <p className="text-xs uppercase tracking-[0.28em] text-slate-500">Launch</p>
-              <h3 className="mt-4 text-xl font-semibold text-slate-950">Operations-grade insights</h3>
+              <h3 className="mt-4 text-xl font-semibold text-[#3e3d3c]">Operations-grade insights</h3>
               <p className="mt-3 text-sm leading-7 text-slate-600">
                 Share the right visuals with stakeholders, from plant managers to executive decision-makers.
               </p>
@@ -512,7 +513,7 @@ export default function Home() {
           <div className="grid gap-10 rounded-[2rem] border border-slate-200 bg-white p-10 shadow-[0_30px_80px_rgba(15,23,42,0.08)] sm:grid-cols-[1fr_0.85fr] reveal" data-reveal>
             <div className="space-y-6">
               <p className="text-sm uppercase tracking-[0.28em] text-slate-500">Collector platform</p>
-              <h2 className="text-3xl font-semibold text-slate-950">Built for teams moving water infrastructure from concept to control.</h2>
+              <h2 className="text-3xl font-semibold text-[#3e3d3c]">Built for teams moving water infrastructure from concept to control.</h2>
               <p className="max-w-xl text-base leading-8 text-slate-700">
                 Collector brings rainwater intelligence, pump system modeling, and valve performance monitoring together in a modern dashboard designed for fast, confident decisions.
               </p>
@@ -533,7 +534,7 @@ export default function Home() {
               <div className="mt-6 space-y-4">
                 <div className="rounded-3xl bg-white p-5 shadow-sm shadow-slate-200/50 border border-slate-200">
                   <p className="text-xs uppercase tracking-[0.24em] text-slate-500 font-semibold">Trusted by</p>
-                  <p className="mt-3 text-lg font-semibold text-slate-950">Water utilities and industrial operators</p>
+                  <p className="mt-3 text-lg font-semibold text-[#3e3d3c]">Water utilities and industrial operators</p>
                 </div>
                 <div className="rounded-3xl bg-white p-5 shadow-sm shadow-slate-200/50 border border-slate-200">
                   <p className="text-xs uppercase tracking-[0.24em] text-slate-500 font-semibold">Highlights</p>
@@ -552,18 +553,18 @@ export default function Home() {
       {/* Footer CTA */}
       <section className="relative py-16 px-6 sm:px-10 lg:px-16 bg-white text-center">
         <div className="mx-auto max-w-3xl reveal" data-reveal>
-          <h2 className="text-3xl font-semibold text-slate-950">Ready to optimize your water systems?</h2>
+          <h2 className="text-3xl font-semibold text-[#3e3d3c]">Ready to optimize your water systems?</h2>
           <p className="mt-4 text-slate-700">Start with our interactive optimizer above, or request a full platform demo.</p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
             <a
               href="#optimizer"
-              className="inline-flex items-center justify-center rounded-full bg-slate-950 px-8 py-4 text-sm font-semibold text-white shadow-lg shadow-slate-900/10 transition hover:bg-slate-800"
+              className="inline-flex items-center justify-center rounded-full bg-[#3e3d3c] px-8 py-4 text-sm font-semibold text-white shadow-lg shadow-[#3e3d3c]/10 transition hover:bg-[#2c2b2a]"
             >
               Get started
             </a>
             <a
               href="mailto:hello@collectorwater.com"
-              className="inline-flex items-center justify-center rounded-full border border-slate-300 bg-white px-8 py-4 text-sm font-semibold text-slate-950 transition hover:border-slate-400"
+              className="inline-flex items-center justify-center rounded-full border border-slate-300 bg-white px-8 py-4 text-sm font-semibold text-[#3e3d3c] transition hover:border-slate-400"
             >
               Request demo
             </a>
