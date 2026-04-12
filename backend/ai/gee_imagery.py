@@ -1,6 +1,9 @@
 """
 Google Earth Engine: export a Sentinel-2 RGB thumbnail around a building.
 
+Sentinel-2 is ~10 m/px; thumbnails are a trade-off: small = cheap/fast for Gemini but
+harder to see fine structure. Tune ``gee_thumb_size`` and ``gee_buffer_meters`` in settings.
+
 Requires: Earth Engine enabled on a GCP project, authentication (e.g.
 `earthengine authenticate` or GOOGLE_APPLICATION_CREDENTIALS), and
 GEE_PROJECT_ID in the environment when calling Initialize.
@@ -9,8 +12,6 @@ GEE_PROJECT_ID in the environment when calling Initialize.
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING
-
 import httpx
 
 from services.settings import get_settings
