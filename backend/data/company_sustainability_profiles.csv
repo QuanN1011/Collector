@@ -1,0 +1,16 @@
+company_id,has_esg_report,has_water_target,has_science_based_target,climate_risk_score,esg_alignment_score
+cmp-amzn,true,true,true,62.0,78.0
+cmp-wmt,true,true,true,58.0,72.0
+cmp-tgt,true,true,true,55.0,70.0
+cmp-fdx,true,true,false,60.0,65.0
+cmp-ups,true,true,true,59.0,68.0
+cmp-tsla,true,false,false,64.0,55.0
+cmp-gm,true,true,true,57.0,74.0
+cmp-intc,true,true,true,61.0,76.0
+cmp-mu,true,true,true,56.0,71.0
+cmp-ko,true,true,true,54.0,69.0
+cmp-pep,true,true,true,53.0,73.0
+cmp-xom,true,false,false,68.0,48.0
+cmp-cvs,true,true,false,50.0,66.0
+cmp-hd,true,true,false,52.0,64.0
+cmp-nke,true,true,true,51.0,75.0

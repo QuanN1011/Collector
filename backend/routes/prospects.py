@@ -10,7 +10,7 @@ router = APIRouter(tags=["prospects"])
 @router.get("/top-prospects", response_model=list[BuildingEnriched])
 def get_top_prospects(
     state: str = Query(..., description="US state code, e.g. TX"),
-    limit: int = Query(50, ge=1, le=500),
+    limit: int = Query(10, ge=1, le=1000, description="Top N by viability (default 10 for demos)"),
 ) -> list[BuildingEnriched]:
     try:
         get_state_context(state)
