@@ -1,18 +1,18 @@
-id,name,state,city,roof_area_sqft
-tx-dfw-001,North Texas Logistics Center,TX,Dallas,185000
-tx-dfw-002,Mesquite Industrial Park Bldg 3,TX,Mesquite,42000
-tx-aus-001,Austin Tech Campus Warehouse,TX,Austin,120000
-tx-hou-001,Gulf Coast Manufacturing Hub,TX,Houston,95000
-az-phx-001,Desert Distribution Center,AZ,Phoenix,135000
-az-tuc-001,Sonora Components Plant,AZ,Tucson,78000
-pa-phl-001,Delaware Valley Cold Storage,PA,Philadelphia,110000
-ca-lax-001,Inland Empire Fulfillment,CA,Riverside,210000
-ca-sjc-001,Silicon Valley Data Hall Annex,CA,San Jose,88000
-fl-mia-001,South Florida Trade Plaza,FL,Miami,67000
-ga-atl-001,Peachtree Industrial Complex,GA,Atlanta,142000
-il-chi-001,Great Lakes Rail Transload,IL,Chicago,118000
-oh-col-001,Buckeye Logistics Warehouse,OH,Columbus,56000
-ny-buf-001,Western NY Industrial,NY,Buffalo,48000
-wa-sea-001,Puget Sound Port Warehouse,WA,Seattle,99000
-co-den-001,Front Range Industrial,CO,Denver,73000
-nc-clt-001,Charlotte Regional DC,NC,Charlotte,105000
+id,name,state,city,roof_area_sqft,latitude,longitude
+tx-dfw-001,North Texas Logistics Center,TX,Dallas,185000,32.8199,-96.8703
+tx-dfw-002,Mesquite Industrial Park Bldg 3,TX,Mesquite,42000,32.7668,-96.5992
+tx-aus-001,Austin Tech Campus Warehouse,TX,Austin,120000,30.3284,-97.6925
+tx-hou-001,Gulf Coast Manufacturing Hub,TX,Houston,95000,29.7499,-95.3584
+az-phx-001,Desert Distribution Center,AZ,Phoenix,135000,33.5722,-112.0891
+az-tuc-001,Sonora Components Plant,AZ,Tucson,78000,32.1542,-110.8787
+pa-phl-001,Delaware Valley Cold Storage,PA,Philadelphia,110000,39.9526,-75.1652
+ca-lax-001,Inland Empire Fulfillment,CA,Riverside,210000,33.9533,-117.3962
+ca-sjc-001,Silicon Valley Data Hall Annex,CA,San Jose,88000,37.3541,-121.9552
+fl-mia-001,South Florida Trade Plaza,FL,Miami,67000,25.7617,-80.1918
+ga-atl-001,Peachtree Industrial Complex,GA,Atlanta,142000,33.7490,-84.3880
+il-chi-001,Great Lakes Rail Transload,IL,Chicago,118000,41.8369,-87.6847
+oh-col-001,Buckeye Logistics Warehouse,OH,Columbus,56000,39.9612,-82.9988
+ny-buf-001,Western NY Industrial,NY,Buffalo,48000,42.8864,-78.8784
+wa-sea-001,Puget Sound Port Warehouse,WA,Seattle,99000,47.6062,-122.3321
+co-den-001,Front Range Industrial,CO,Denver,73000,39.7392,-104.9903
+nc-clt-001,Charlotte Regional DC,NC,Charlotte,105000,35.2271,-80.8431

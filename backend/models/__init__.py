@@ -1,3 +1,3 @@
-from models.building import BuildingEnriched, BuildingRecord
+from models.building import BuildingEnriched, BuildingRecord, PhysicalAnalysis
 
-__all__ = ["BuildingEnriched", "BuildingRecord"]
+__all__ = ["BuildingEnriched", "BuildingRecord", "PhysicalAnalysis"]

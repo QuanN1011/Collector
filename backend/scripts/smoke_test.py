@@ -1,0 +1,83 @@
+#!/usr/bin/env python3
+"""
+Quick checks for the RainUSE Nexus API (no running server required).
+
+Usage (from repo):
+  cd backend
+  python scripts/smoke_test.py
+
+Optional (live GEE + Gemini — slow, needs .env + credentials):
+  RUN_LIVE_CV=1 python scripts/smoke_test.py
+"""
+
+from __future__ import annotations
+
+import os
+import sys
+from pathlib import Path
+
+# Run as: cd backend && python scripts/smoke_test.py
+_BACKEND = Path(__file__).resolve().parent.parent
+if str(_BACKEND) not in sys.path:
+    sys.path.insert(0, str(_BACKEND))
+os.chdir(_BACKEND)
+
+from fastapi.testclient import TestClient  # noqa: E402
+
+from main import app  # noqa: E402
+
+
+def main() -> int:
+    c = TestClient(app)
+
+    r = c.get("/health")
+    assert r.status_code == 200, r.text
+    print("OK  GET /health")
+
+    r = c.get("/buildings?state=TX")
+    assert r.status_code == 200, r.text
+    data = r.json()
+    assert len(data) >= 1
+    b0 = data[0]
+    for key in (
+        "id",
+        "physical_analysis",
+        "viability_score",
+        "rainwater_potential_gallons",
+        "annual_water_savings",
+    ):
+        assert key in b0, f"missing {key}"
+    pa = b0["physical_analysis"]
+    assert pa["vision_backend"] == "mock"
+    print(f"OK  GET /buildings?state=TX ({len(data)} buildings)")
+
+    bid = b0["id"]
+    r = c.get(f"/building/{bid}")
+    assert r.status_code == 200, r.text
+    print(f"OK  GET /building/{bid}")
+
+    r = c.get("/top-prospects?state=TX&limit=3")
+    assert r.status_code == 200, r.text
+    top = r.json()
+    assert len(top) <= 3
+    if len(top) >= 2:
+        assert top[0]["viability_score"] >= top[1]["viability_score"]
+    print("OK  GET /top-prospects?state=TX&limit=3")
+
+    if os.environ.get("RUN_LIVE_CV") == "1":
+        r = c.get(f"/building/{bid}?live_cv=true")
+        assert r.status_code == 200, r.text
+        pa = r.json()["physical_analysis"]
+        print(
+            f"OK  GET /building/{bid}?live_cv=true  "
+            f"imagery={pa['imagery_source']!r} backend={pa['vision_backend']!r}"
+        )
+    else:
+        print("SKIP live CV (set RUN_LIVE_CV=1 to exercise GEE+Gemini — first call can take 30–90s)")
+
+    print("\nAll smoke checks passed.")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
