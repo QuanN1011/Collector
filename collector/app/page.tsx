@@ -1,7 +1,16 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { AuthBar } from "@/app/Components/AuthBar";
+import { EmailVerificationBanner } from "@/app/Components/EmailVerificationBanner";
+import { SettingsMenu } from "@/app/Components/SettingsMenu";
 import InteractiveTopUI from "./Components/InteractiveTopUI";
+
+const API_BASE =
+  (typeof process.env.NEXT_PUBLIC_API_URL === "string" && process.env.NEXT_PUBLIC_API_URL.length > 0
+    ? process.env.NEXT_PUBLIC_API_URL
+    : "http://127.0.0.1:8000"
+  ).replace(/\/$/, "");
 
 type BuildingEnriched = {
   id: string;
@@ -57,6 +66,10 @@ function formatNumber(value: number, digits = 1) {
 }
 
 export default function Home() {
+  const [backendBuilding, setBackendBuilding] = useState<BuildingEnriched | null>(null);
+  const [buildingLoading, setBuildingLoading] = useState(true);
+  const [backendError, setBackendError] = useState("");
+
   const [dailyVolume, setDailyVolume] = useState(INITIALS.dailyVolume);
   const [sourceElevation, setSourceElevation] = useState(INITIALS.sourceElevation);
   const [destinationElevation, setDestinationElevation] = useState(
@@ -66,7 +79,54 @@ export default function Home() {
   const [pumpEfficiency, setPumpEfficiency] = useState(INITIALS.pumpEfficiency);
   const [pumpCount, setPumpCount] = useState(INITIALS.pumpCount);
 
-  const backendBuilding = MOCK_BUILDING;
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadBuilding() {
+      setBuildingLoading(true);
+      setBackendError("");
+      try {
+        const headers: Record<string, string> = {};
+        if (typeof window !== "undefined") {
+          const key = localStorage.getItem("rainuse_api_key");
+          if (key) headers["X-Api-Key"] = key;
+        }
+        const response = await fetch(`${API_BASE}/top-prospects?state=TX&limit=1`, { headers });
+        if (!response.ok) {
+          throw new Error(`API error ${response.status}`);
+        }
+        const data: BuildingEnriched[] = await response.json();
+        if (data.length === 0) {
+          throw new Error("No backend building data available");
+        }
+        const building = data[0];
+        if (cancelled) return;
+        setBackendBuilding(building);
+        const dailyFromPotential = Math.max(
+          INITIALS.dailyVolume,
+          Math.round((building.rainwater_potential_gallons / 264.172 / 365) * 100) / 100,
+        );
+        setDailyVolume(dailyFromPotential);
+        setSourceElevation(80);
+        setDestinationElevation(95);
+        setPumpCount(1);
+      } catch (error) {
+        if (!cancelled) {
+          setBackendError(error instanceof Error ? error.message : "Unknown backend error");
+          setBackendBuilding(null);
+        }
+      } finally {
+        if (!cancelled) setBuildingLoading(false);
+      }
+    }
+
+    void loadBuilding();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const displayBuilding = backendBuilding ?? MOCK_BUILDING;
 
   const estimate = useMemo(() => {
     const flowRate = dailyVolume / 86400;
@@ -103,14 +163,20 @@ export default function Home() {
         loop
         muted
         playsInline
-        className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-30"
-        style={{ zIndex: 2 }}
+        className="pointer-events-none absolute inset-0 z-[2] h-full w-full object-cover opacity-30"
       >
         <source src="/Valve Oil Gauge Video.mp4" type="video/mp4" />
       </video>
 
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-slate-950/80 via-slate-950/70 to-slate-950/95" style={{ zIndex: 3 }} />
-      <main className="relative mx-auto flex min-h-screen max-w-7xl flex-col gap-10 px-6 py-12 sm:px-10 lg:px-16" style={{ zIndex: 4 }}>
+      <div className="pointer-events-none absolute inset-0 z-[3] bg-gradient-to-b from-slate-950/80 via-slate-950/70 to-slate-950/95" />
+      <main className="relative z-[4] mx-auto flex min-h-screen max-w-7xl flex-col gap-10 px-6 py-12 sm:px-10 lg:px-16">
+        <div className="flex w-full flex-col gap-3">
+          <div className="flex w-full items-center justify-end gap-2">
+            <AuthBar />
+            <SettingsMenu />
+          </div>
+          <EmailVerificationBanner />
+        </div>
         <section className="grid gap-8 lg:grid-cols-[1.4fr_1fr] lg:items-start">
           <div className="rounded-[32px] border border-white/10 bg-slate-950/80 p-8 shadow-2xl shadow-slate-950/40 backdrop-blur-xl sm:p-10">
             <span className="inline-flex rounded-full bg-cyan-500/15 px-4 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-cyan-300">
@@ -126,25 +192,38 @@ export default function Home() {
             <div className="mt-8 rounded-3xl border border-white/10 bg-slate-900/80 p-5 text-sm text-slate-300 shadow-inner shadow-black/5">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Building data (demo)</p>
-                  <p className="mt-2 text-base font-semibold text-white">{backendBuilding.name}</p>
+                  <p className="text-xs uppercase tracking-[0.18em] text-slate-500">
+                    {buildingLoading
+                      ? "Building data"
+                      : backendBuilding
+                        ? "Building data (API)"
+                        : backendError
+                          ? "Building data (demo — API unavailable)"
+                          : "Building data (demo)"}
+                  </p>
+                  <p className="mt-2 text-base font-semibold text-white">
+                    {buildingLoading ? "Loading…" : displayBuilding.name}
+                  </p>
+                  {backendError && !buildingLoading && (
+                    <p className="mt-2 text-xs text-amber-200/90">{backendError}</p>
+                  )}
                 </div>
                 <div className="rounded-3xl bg-slate-950/90 px-4 py-2 text-xs uppercase tracking-[0.18em] text-slate-500">
-                  {backendBuilding.state}
+                  {buildingLoading ? "…" : displayBuilding.state}
                 </div>
               </div>
               <div className="mt-4 grid gap-3 sm:grid-cols-3">
                 <div className="rounded-3xl bg-slate-950/80 p-3">
                   <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Roof area</p>
-                  <p className="mt-2 text-sm font-semibold text-white">{backendBuilding.roof_area_sqft.toLocaleString()} sqft</p>
+                  <p className="mt-2 text-sm font-semibold text-white">{displayBuilding.roof_area_sqft.toLocaleString()} sqft</p>
                 </div>
                 <div className="rounded-3xl bg-slate-950/80 p-3">
                   <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Annual capture</p>
-                  <p className="mt-2 text-sm font-semibold text-white">{Math.round(backendBuilding.rainwater_potential_gallons).toLocaleString()} gal</p>
+                  <p className="mt-2 text-sm font-semibold text-white">{Math.round(displayBuilding.rainwater_potential_gallons).toLocaleString()} gal</p>
                 </div>
                 <div className="rounded-3xl bg-slate-950/80 p-3">
                   <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Water cost</p>
-                  <p className="mt-2 text-sm font-semibold text-white">${backendBuilding.water_price_per_1000_gal_usd.toFixed(2)}/1000 gal</p>
+                  <p className="mt-2 text-sm font-semibold text-white">${displayBuilding.water_price_per_1000_gal_usd.toFixed(2)}/1000 gal</p>
                 </div>
               </div>
             </div>
@@ -222,8 +301,10 @@ export default function Home() {
               </button>
               <div className="rounded-3xl border border-white/10 bg-slate-900/80 p-4 text-sm text-slate-300">
                 <div className="flex items-center justify-between text-slate-200">
-                  <span className="font-semibold">Selected pumps</span>
-                  <span>{pumpCount}</span>
+                  <span className="font-semibold" id="pump-count-label">
+                    Selected pumps
+                  </span>
+                  <span aria-hidden="true">{pumpCount}</span>
                 </div>
                 <input
                   type="range"
@@ -232,6 +313,7 @@ export default function Home() {
                   value={pumpCount}
                   onChange={(event) => setPumpCount(Number(event.target.value))}
                   className="mt-3 w-full"
+                  aria-labelledby="pump-count-label"
                 />
               </div>
             </div>

@@ -36,6 +36,12 @@ import sys
 from pathlib import Path
 
 BACKEND_ROOT = Path(__file__).resolve().parent.parent
+if str(BACKEND_ROOT) not in sys.path:
+    sys.path.insert(0, str(BACKEND_ROOT))
+
+from env_load import load_backend_env
+
+load_backend_env()
 IMPORTS_DIR = BACKEND_ROOT / "data" / "imports"
 OVERRIDES_CSV = IMPORTS_DIR / "state_context_overrides.csv"
 

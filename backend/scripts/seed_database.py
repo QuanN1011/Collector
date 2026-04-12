@@ -26,8 +26,17 @@ from __future__ import annotations
 
 import argparse
 import csv
+import sys
 from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
+
+_BACKEND_ROOT = Path(__file__).resolve().parent.parent
+if str(_BACKEND_ROOT) not in sys.path:
+    sys.path.insert(0, str(_BACKEND_ROOT))
+
+from env_load import load_backend_env
+
+load_backend_env()
 
 from geoalchemy2.elements import WKTElement
 from sqlalchemy import delete, select
@@ -71,7 +80,6 @@ from services.seed_scoring import (
     water_yield_pillar,
 )
 
-_BACKEND_ROOT = Path(__file__).resolve().parent.parent
 _DATA = _BACKEND_ROOT / "data"
 
 # Fallback centers if lat/lon omitted in CSV (legacy jitter).
