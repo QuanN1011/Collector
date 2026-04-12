@@ -10,6 +10,7 @@ backend/.docs
 
 # Root-level Node/Next artifacts (app lives in collector/)
 node_modules/
+collector/.env.local
 .next/
 out/
 *.tsbuildinfo
