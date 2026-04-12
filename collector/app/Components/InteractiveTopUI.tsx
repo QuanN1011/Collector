@@ -22,100 +22,67 @@ const InteractiveTopUI: React.FC = () => {
       setMousePos({ x: e.clientX, y: e.clientY });
     };
 
-    const drawGrid = () => {
+    const drawTopography = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Light background gradient
-      const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-      gradient.addColorStop(0, 'rgba(248, 250, 252, 0.05)'); // slate-50 with very low opacity
-      gradient.addColorStop(0.5, 'rgba(241, 245, 249, 0.03)'); // slate-100 with very low opacity
-      gradient.addColorStop(1, 'rgba(248, 250, 252, 0.05)'); // slate-50 with very low opacity
-
+      const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      gradient.addColorStop(0, 'rgba(15, 23, 42, 0.12)');
+      gradient.addColorStop(0.45, 'rgba(30, 41, 59, 0.08)');
+      gradient.addColorStop(1, 'rgba(248, 250, 252, 0.04)');
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Set up grid properties
-      const gridSize = 60;
-      const lineWidth = 0.8;
-      const maxOffset = 15;
+      const lineCount = 12;
+      const amplitude = 24;
+      const spacing = canvas.height / (lineCount + 1.5);
+      const time = performance.now() * 0.001;
 
-      // Draw vertical lines with smooth offset based on mouse proximity
-      for (let x = 0; x <= canvas.width; x += gridSize) {
+      for (let i = 0; i < lineCount; i += 1) {
+        const baseY = spacing * (i + 1);
+        const sway = Math.sin(time * 0.8 + i * 0.5) * 16;
+        const offsetIntensity = 1 - Math.abs(mousePos.y - baseY) / canvas.height;
         ctx.beginPath();
-        ctx.strokeStyle = 'rgba(148, 163, 184, 0.15)'; // slate-400 with low opacity
-        ctx.lineWidth = lineWidth;
+        ctx.strokeStyle = i % 2 === 0 ? 'rgba(14, 165, 233, 0.24)' : 'rgba(29, 78, 216, 0.16)';
+        ctx.lineWidth = 1.4;
+        ctx.lineJoin = 'round';
 
-        for (let y = 0; y <= canvas.height; y += 5) {
-          const distance = Math.sqrt((x - mousePos.x) ** 2 + (y - mousePos.y) ** 2);
-          const influence = Math.max(0, 1 - distance / 200); // Influence radius of 200px
-          const offsetX = Math.sin(y * 0.01 + Date.now() * 0.001) * maxOffset * influence;
-
-          if (y === 0) {
-            ctx.moveTo(x + offsetX, y);
-          } else {
-            ctx.lineTo(x + offsetX, y);
-          }
-        }
-        ctx.stroke();
-      }
-
-      // Draw horizontal lines with smooth offset based on mouse proximity
-      for (let y = 0; y <= canvas.height; y += gridSize) {
-        ctx.beginPath();
-        ctx.strokeStyle = 'rgba(148, 163, 184, 0.15)'; // slate-400 with low opacity
-        ctx.lineWidth = lineWidth;
-
-        for (let x = 0; x <= canvas.width; x += 5) {
-          const distance = Math.sqrt((x - mousePos.x) ** 2 + (y - mousePos.y) ** 2);
-          const influence = Math.max(0, 1 - distance / 200); // Influence radius of 200px
-          const offsetY = Math.sin(x * 0.01 + Date.now() * 0.001) * maxOffset * influence;
+        for (let x = 0; x <= canvas.width; x += 24) {
+          const wave = Math.sin((x / canvas.width) * Math.PI * 2 + time + i) * amplitude;
+          const mouseShift = Math.sin((mousePos.x / canvas.width) * Math.PI + time * 0.7) * 8 * offsetIntensity;
+          const y = baseY + wave + sway * 0.15 + mouseShift;
 
           if (x === 0) {
-            ctx.moveTo(x, y + offsetY);
+            ctx.moveTo(x, y);
           } else {
-            ctx.lineTo(x, y + offsetY);
+            ctx.lineTo(x, y);
           }
         }
         ctx.stroke();
       }
 
-      // Draw diagonal accent lines
-      const numDiagonals = 8;
-      for (let i = 0; i < numDiagonals; i++) {
-        const startX = (canvas.width / numDiagonals) * i;
-        const startY = 0;
-        const endX = startX + canvas.width * 0.4;
-        const endY = canvas.height;
+      const nodes = [
+        { x: canvas.width * 0.18, y: canvas.height * 0.55 },
+        { x: canvas.width * 0.66, y: canvas.height * 0.34 },
+        { x: canvas.width * 0.88, y: canvas.height * 0.7 },
+      ];
+
+      nodes.forEach((node, index) => {
+        const pulse = 1 + Math.sin(time * 2 + index * 1.7) * 0.2;
+        ctx.beginPath();
+        ctx.fillStyle = 'rgba(14, 165, 233, 0.18)';
+        ctx.arc(node.x, node.y, 12 * pulse, 0, Math.PI * 2);
+        ctx.fill();
 
         ctx.beginPath();
-        ctx.strokeStyle = 'rgba(148, 163, 184, 0.08)'; // slate-400 with very low opacity
-        ctx.lineWidth = 0.5;
-
-        const steps = 50;
-        for (let j = 0; j <= steps; j++) {
-          const t = j / steps;
-          const currentX = startX + (endX - startX) * t;
-          const currentY = startY + (endY - startY) * t;
-
-          const distance = Math.sqrt((currentX - mousePos.x) ** 2 + (currentY - mousePos.y) ** 2);
-          const influence = Math.max(0, 1 - distance / 150);
-          const waveOffset = Math.sin(t * Math.PI * 2 + Date.now() * 0.002) * 8 * influence;
-
-          const offsetX = Math.cos(Math.atan2(endY - startY, endX - startX)) * waveOffset;
-          const offsetY = Math.sin(Math.atan2(endY - startY, endX - startX)) * waveOffset;
-
-          if (j === 0) {
-            ctx.moveTo(currentX + offsetX, currentY + offsetY);
-          } else {
-            ctx.lineTo(currentX + offsetX, currentY + offsetY);
-          }
-        }
+        ctx.strokeStyle = 'rgba(56, 189, 248, 0.5)';
+        ctx.lineWidth = 2;
+        ctx.arc(node.x, node.y, 18 * pulse, 0, Math.PI * 2);
         ctx.stroke();
-      }
+      });
     };
 
     const animate = () => {
-      drawGrid();
+      drawTopography();
       animationFrameRef.current = requestAnimationFrame(animate);
     };
 
