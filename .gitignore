@@ -2,3 +2,12 @@
 backend/.venv/
 backend/**/__pycache__/
 *.py[cod]
+
+# Root-level Node/Next artifacts (app lives in collector/)
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+
+# OS / editor
+.DS_Store

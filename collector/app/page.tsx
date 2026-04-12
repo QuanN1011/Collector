@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+import InteractiveTopUI from "./Components/InteractiveTopUI";
 
 type BuildingEnriched = {
   id: string;
@@ -29,7 +30,24 @@ const INITIALS = {
   pumpCount: 1,
 };
 
-const BACKEND_BASE = "http://localhost:8000";
+/** Static sample row for the mock UI (swap for live API data when wired). */
+const MOCK_BUILDING: BuildingEnriched = {
+  id: "demo-1",
+  name: "Austin Logistics Hub",
+  state: "TX",
+  city: "Austin",
+  roof_area_sqft: 128_000,
+  rainfall_inches_annual: 34,
+  water_price_per_1000_gal_usd: 4.25,
+  rainwater_potential_gallons: 2_450_000,
+  annual_water_savings: 180_000,
+  viability_score: 0.82,
+  viability_breakdown: {},
+  cooling_tower_detected: true,
+  cooling_tower_confidence: 0.71,
+  esg_signal_score: 0.76,
+  data_notes: "Demo dataset",
+};
 
 function formatNumber(value: number, digits = 1) {
   return value.toLocaleString(undefined, {
@@ -39,10 +57,6 @@ function formatNumber(value: number, digits = 1) {
 }
 
 export default function Home() {
-  const [backendBuilding, setBackendBuilding] = useState<BuildingEnriched | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [backendError, setBackendError] = useState("");
-
   const [dailyVolume, setDailyVolume] = useState(INITIALS.dailyVolume);
   const [sourceElevation, setSourceElevation] = useState(INITIALS.sourceElevation);
   const [destinationElevation, setDestinationElevation] = useState(
@@ -52,43 +66,7 @@ export default function Home() {
   const [pumpEfficiency, setPumpEfficiency] = useState(INITIALS.pumpEfficiency);
   const [pumpCount, setPumpCount] = useState(INITIALS.pumpCount);
 
-  useEffect(() => {
-    async function fetchBuilding() {
-      setLoading(true);
-      setBackendError("");
-
-      try {
-        const response = await fetch(`${BACKEND_BASE}/top-prospects?state=TX&limit=1`);
-        if (!response.ok) {
-          throw new Error(`API error ${response.status}`);
-        }
-        const data: BuildingEnriched[] = await response.json();
-        if (data.length === 0) {
-          throw new Error("No backend building data available");
-        }
-
-        const building = data[0];
-        setBackendBuilding(building);
-
-        const dailyFromPotential = Math.max(
-          INITIALS.dailyVolume,
-          Math.round((building.rainwater_potential_gallons / 264.172 / 365) * 100) / 100,
-        );
-        setDailyVolume(dailyFromPotential);
-        setSourceElevation(80);
-        setDestinationElevation(95);
-        setPumpCount(1);
-      } catch (error) {
-        setBackendError(
-          error instanceof Error ? error.message : "Unknown backend error",
-        );
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    void fetchBuilding();
-  }, []);
+  const backendBuilding = MOCK_BUILDING;
 
   const estimate = useMemo(() => {
     const flowRate = dailyVolume / 86400;
@@ -116,12 +94,23 @@ export default function Home() {
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-slate-950 text-slate-100">
-      <div
-        className="pointer-events-none absolute inset-0 bg-cover bg-center opacity-30"
-        style={{ backgroundImage: "url('/topui.jpg')" }}
-      />
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-slate-950/80 via-slate-950/70 to-slate-950/95" />
-      <main className="relative mx-auto flex min-h-screen max-w-7xl flex-col gap-10 px-6 py-12 sm:px-10 lg:px-16">
+      {/* Interactive TopUI Background */}
+      <InteractiveTopUI />
+
+      {/* Valve Video Background */}
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-30"
+        style={{ zIndex: 2 }}
+      >
+        <source src="/Valve Oil Gauge Video.mp4" type="video/mp4" />
+      </video>
+
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-slate-950/80 via-slate-950/70 to-slate-950/95" style={{ zIndex: 3 }} />
+      <main className="relative mx-auto flex min-h-screen max-w-7xl flex-col gap-10 px-6 py-12 sm:px-10 lg:px-16" style={{ zIndex: 4 }}>
         <section className="grid gap-8 lg:grid-cols-[1.4fr_1fr] lg:items-start">
           <div className="rounded-[32px] border border-white/10 bg-slate-950/80 p-8 shadow-2xl shadow-slate-950/40 backdrop-blur-xl sm:p-10">
             <span className="inline-flex rounded-full bg-cyan-500/15 px-4 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-cyan-300">
@@ -137,33 +126,27 @@ export default function Home() {
             <div className="mt-8 rounded-3xl border border-white/10 bg-slate-900/80 p-5 text-sm text-slate-300 shadow-inner shadow-black/5">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Backend building data</p>
-                  <p className="mt-2 text-base font-semibold text-white">
-                    {loading ? "Loading building data…" : backendError ? "Failed to load backend values" : backendBuilding?.name ?? "No building selected"}
-                  </p>
+                  <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Building data (demo)</p>
+                  <p className="mt-2 text-base font-semibold text-white">{backendBuilding.name}</p>
                 </div>
                 <div className="rounded-3xl bg-slate-950/90 px-4 py-2 text-xs uppercase tracking-[0.18em] text-slate-500">
-                  {backendBuilding ? backendBuilding.state : loading ? "Loading" : "Offline"}
+                  {backendBuilding.state}
                 </div>
               </div>
-              {backendBuilding ? (
-                <div className="mt-4 grid gap-3 sm:grid-cols-3">
-                  <div className="rounded-3xl bg-slate-950/80 p-3">
-                    <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Roof area</p>
-                    <p className="mt-2 text-sm font-semibold text-white">{backendBuilding.roof_area_sqft.toLocaleString()} sqft</p>
-                  </div>
-                  <div className="rounded-3xl bg-slate-950/80 p-3">
-                    <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Annual capture</p>
-                    <p className="mt-2 text-sm font-semibold text-white">{Math.round(backendBuilding.rainwater_potential_gallons).toLocaleString()} gal</p>
-                  </div>
-                  <div className="rounded-3xl bg-slate-950/80 p-3">
-                    <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Water cost</p>
-                    <p className="mt-2 text-sm font-semibold text-white">${backendBuilding.water_price_per_1000_gal_usd.toFixed(2)}/1000 gal</p>
-                  </div>
+              <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                <div className="rounded-3xl bg-slate-950/80 p-3">
+                  <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Roof area</p>
+                  <p className="mt-2 text-sm font-semibold text-white">{backendBuilding.roof_area_sqft.toLocaleString()} sqft</p>
                 </div>
-              ) : backendError ? (
-                <p className="mt-4 text-sm text-rose-300">{backendError}</p>
-              ) : null}
+                <div className="rounded-3xl bg-slate-950/80 p-3">
+                  <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Annual capture</p>
+                  <p className="mt-2 text-sm font-semibold text-white">{Math.round(backendBuilding.rainwater_potential_gallons).toLocaleString()} gal</p>
+                </div>
+                <div className="rounded-3xl bg-slate-950/80 p-3">
+                  <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Water cost</p>
+                  <p className="mt-2 text-sm font-semibold text-white">${backendBuilding.water_price_per_1000_gal_usd.toFixed(2)}/1000 gal</p>
+                </div>
+              </div>
             </div>
             <div className="mt-10 grid gap-4 sm:grid-cols-2">
               <label className="space-y-2 rounded-3xl bg-slate-900/80 p-4 text-sm text-slate-300 shadow-inner shadow-black/10">
