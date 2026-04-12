@@ -1,6 +1,18 @@
 from pydantic import BaseModel, Field
 
 
+class PhysicalAnalysis(BaseModel):
+    """Satellite + vision (or mock) outputs for prospecting rubric."""
+
+    roof_catchment_sqft: float = Field(..., description="Catchment area used for rainwater math")
+    large_roof: bool = Field(..., description="True if catchment >= 100,000 sq ft")
+    roof_confidence: float = Field(..., ge=0, le=1)
+    cooling_tower_detected: bool
+    cooling_tower_confidence: float = Field(..., ge=0, le=1)
+    imagery_source: str = Field(..., description="COPERNICUS/S2_SR_HARMONIZED or none")
+    vision_backend: str = Field(..., description="gemini_vision | mock")
+
+
 class BuildingRecord(BaseModel):
     """Row from buildings dataset (Postgres or CSV fallback)."""
 
@@ -32,4 +44,7 @@ class BuildingEnriched(BaseModel):
     cooling_tower_detected: bool
     cooling_tower_confidence: float = Field(..., ge=0, le=1)
     esg_signal_score: float = Field(..., ge=0, le=100, description="Mock ESG / sustainability signal 0–100")
-    data_notes: str = "MVP: footprint used as roof; water price and rainfall are state averages."
+    physical_analysis: PhysicalAnalysis
+    data_notes: str = (
+        "Roof area from building dataset; optional live CV uses GEE Sentinel-2 + Gemini when enabled in .env."
+    )

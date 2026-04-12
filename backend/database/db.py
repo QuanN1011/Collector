@@ -73,6 +73,8 @@ def _load_buildings_csv() -> tuple[BuildingRecord, ...]:
     with path.open(newline="", encoding="utf-8") as f:
         reader = csv.DictReader(f)
         for row in reader:
+            lat_raw = (row.get("latitude") or "").strip()
+            lon_raw = (row.get("longitude") or "").strip()
             records.append(
                 BuildingRecord(
                     id=row["id"].strip(),

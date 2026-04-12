@@ -1,7 +1,11 @@
 # Python backend (RainUSE Nexus)
 backend/.venv/
+backend/.env
 backend/**/__pycache__/
 *.py[cod]
+backend/.docs
+
+
 
 # Root-level Node/Next artifacts (app lives in collector/)
 node_modules/
