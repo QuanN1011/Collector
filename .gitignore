@@ -11,3 +11,6 @@ out/
 
 # OS / editor
 .DS_Store
+backend/.env
+.env
+backend/data/cache/
