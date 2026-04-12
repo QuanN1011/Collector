@@ -1,6 +1,6 @@
 from models.building import BuildingEnriched, BuildingRecord
 from ai.cooling_tower_detection import detect_cooling_tower
-from database.db import StateContext, get_state_context
+from database.db import StateContext, get_state_context, get_stored_final_viability_standalone
 from services.rainwater import annual_rainwater_gallons
 from services.roi import annual_water_savings_usd
 from services.scoring import compute_viability, mock_esg_subscore
@@ -19,6 +19,9 @@ def enrich_building(record: BuildingRecord, state_ctx: StateContext | None = Non
         cooling_tower_confidence=tower_conf,
         building_id=record.id,
     )
+    stored_final = get_stored_final_viability_standalone(record.id)
+    if stored_final is not None:
+        score = stored_final
     esg = mock_esg_subscore(record.id)
 
     return BuildingEnriched(
@@ -27,6 +30,8 @@ def enrich_building(record: BuildingRecord, state_ctx: StateContext | None = Non
         state=record.state,
         city=record.city,
         roof_area_sqft=record.roof_area_sqft,
+        latitude=record.latitude,
+        longitude=record.longitude,
         rainfall_inches_annual=ctx.rainfall_inches_annual,
         water_price_per_1000_gal_usd=ctx.water_price_per_1000_gal_usd,
         rainwater_potential_gallons=round(gallons, 2),
