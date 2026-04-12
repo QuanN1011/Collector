@@ -9,6 +9,8 @@ export type PhysicalAnalysis = {
   cooling_tower_confidence: number;
   imagery_source: string;
   vision_backend: string;
+  roof_area_estimated_cv?: number | null;
+  cv_reasoning?: string | null;
 };
 
 export type BuildingEnriched = {
@@ -30,6 +32,9 @@ export type BuildingEnriched = {
   esg_signal_score: number;
   physical_analysis: PhysicalAnalysis;
   data_notes: string;
+  roof_area_sqft_catalog?: number | null;
+  roof_area_estimated_cv?: number | null;
+  cv_reasoning?: string | null;
 };
 
 export type StatesResponse = {
@@ -38,4 +43,20 @@ export type StatesResponse = {
 
 export type HealthResponse = {
   status: string;
+};
+
+/** Geocoded address analysis (satellite + model). */
+export type AnalyzeBuildingResponse = {
+  building_name: string;
+  address: string;
+  lat: number;
+  lng: number;
+  satellite_image: string;
+  roof_estimate: string;
+  roof_area_sqft: number;
+  cooling_tower_detected: boolean;
+  cooling_tower_confidence: number;
+  rainwater_potential_gallons: number;
+  annual_water_savings: number;
+  viability_score: number;
 };

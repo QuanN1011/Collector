@@ -13,6 +13,7 @@ from api_key.dependencies import require_api_key
 from api_key.routes_issue import router as api_keys_issue_router
 from database.config import get_database_url
 from database.engine import get_engine, init_db
+from routes.analyze_building import router as analyze_building_router
 from routes.buildings import router as buildings_router, single_router as building_single_router
 from routes.prospects import router as prospects_router
 from routes.states import router as states_router
@@ -45,6 +46,7 @@ app.include_router(states_router, dependencies=[Depends(require_api_key)])
 app.include_router(buildings_router, dependencies=[Depends(require_api_key)])
 app.include_router(building_single_router, dependencies=[Depends(require_api_key)])
 app.include_router(prospects_router, dependencies=[Depends(require_api_key)])
+app.include_router(analyze_building_router, dependencies=[Depends(require_api_key)])
 app.include_router(api_keys_issue_router)
 
 

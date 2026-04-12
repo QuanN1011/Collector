@@ -10,16 +10,24 @@ class PhysicalAnalysis(BaseModel):
         ...,
         ge=0,
         le=1,
-        description="Confidence in catalog catchment sq ft (data lineage), not vision-segmented roof",
+        description="Confidence in catchment (catalog lineage or Gemini roof estimate)",
     )
     roof_catchment_provenance: str = Field(
         ...,
-        description="How catchment area was derived, e.g. synthetic_seed, catalog_polygon_footprint",
+        description="How catchment was derived, e.g. gemini_static_maps_satellite, catalog_area_only",
     )
     cooling_tower_detected: bool
     cooling_tower_confidence: float = Field(..., ge=0, le=1)
-    imagery_source: str = Field(..., description="COPERNICUS/S2_SR_HARMONIZED or none")
+    imagery_source: str = Field(
+        ...,
+        description="google_static_maps | none (legacy EE chips are no longer used for live_cv)",
+    )
     vision_backend: str = Field(..., description="gemini_vision | mock")
+    roof_area_estimated_cv: float | None = Field(
+        default=None,
+        description="Raw Gemini estimated roof sq ft before fallback to catalog",
+    )
+    cv_reasoning: str | None = Field(default=None, description="Short model rationale when live CV ran")
 
 
 class BuildingRecord(BaseModel):
@@ -62,7 +70,13 @@ class BuildingEnriched(BaseModel):
     cooling_tower_confidence: float = Field(..., ge=0, le=1)
     esg_signal_score: float = Field(..., ge=0, le=100, description="Mock ESG / sustainability signal 0–100")
     physical_analysis: PhysicalAnalysis
-    data_notes: str = (
-        "Roof catchment from catalog/footprint data (see physical_analysis.roof_catchment_provenance); "
-        "live CV targets cooling-tower cues only, not roof segmentation."
+    roof_area_sqft_catalog: float | None = Field(
+        default=None,
+        description="Original catalog roof_area_sqft; set when live_cv was requested for comparison",
     )
+    roof_area_estimated_cv: float | None = Field(
+        default=None,
+        description="Gemini roof estimate from Static Maps chip (may match physical_analysis.roof_area_estimated_cv)",
+    )
+    cv_reasoning: str | None = Field(default=None, description="Gemini reasoning when live CV succeeded")
+    data_notes: str = "See GET /building/{id} and optional ?live_cv=true for Static Maps + Gemini."

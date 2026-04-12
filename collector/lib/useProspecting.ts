@@ -1,8 +1,16 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { fetchBuilding, fetchBuildings, fetchHealth, fetchStates, fetchTopProspects } from "./api";
-import type { BuildingEnriched } from "./types";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  fetchAnalyzeBuilding,
+  fetchBuilding,
+  fetchBuildings,
+  fetchHealth,
+  fetchStates,
+  fetchTopProspects,
+} from "./api";
+import { mergeAnalyzeIntoBuildingEnriched } from "./mergeAddressAnalysis";
+import type { AnalyzeBuildingResponse, BuildingEnriched } from "./types";
 
 type HealthState = "checking" | "ok" | "error";
 
@@ -14,12 +22,14 @@ export function useProspecting() {
   const [selectedBuildingId, setSelectedBuildingId] = useState("");
   const [buildingDetail, setBuildingDetail] = useState<BuildingEnriched | null>(null);
   const [topProspects, setTopProspects] = useState<BuildingEnriched[]>([]);
-  const [liveCv, setLiveCv] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loadingStates, setLoadingStates] = useState(true);
   const [loadingBuildings, setLoadingBuildings] = useState(false);
   const [loadingDetail, setLoadingDetail] = useState(false);
   const [loadingTop, setLoadingTop] = useState(false);
+  const [satelliteLoading, setSatelliteLoading] = useState(false);
+  const [streetAddress, setStreetAddress] = useState("");
+  const [addressAnalyzeResult, setAddressAnalyzeResult] = useState<AnalyzeBuildingResponse | null>(null);
 
   const refreshHealth = useCallback(async () => {
     setHealth("checking");
@@ -60,6 +70,10 @@ export function useProspecting() {
       cancelled = true;
     };
   }, []);
+
+  useEffect(() => {
+    setAddressAnalyzeResult(null);
+  }, [selectedState]);
 
   useEffect(() => {
     if (!selectedState) {
@@ -103,8 +117,9 @@ export function useProspecting() {
     (async () => {
       setLoadingDetail(true);
       setError(null);
+      setBuildingDetail(null);
       try {
-        const b = await fetchBuilding(selectedBuildingId, liveCv);
+        const b = await fetchBuilding(selectedBuildingId, false);
         if (!cancelled) setBuildingDetail(b);
       } catch (e) {
         if (!cancelled) {
@@ -118,7 +133,49 @@ export function useProspecting() {
     return () => {
       cancelled = true;
     };
-  }, [selectedBuildingId, liveCv]);
+  }, [selectedBuildingId]);
+
+  const stateContextSample = useMemo(() => {
+    if (!buildings.length) return null;
+    return buildings.find((b) => b.id === selectedBuildingId) ?? buildings[0] ?? null;
+  }, [buildings, selectedBuildingId]);
+
+  /** Merged row for water economics when address pipeline was used. */
+  const economicsBuilding = useMemo((): BuildingEnriched | null => {
+    if (addressAnalyzeResult) {
+      if (!stateContextSample) return null;
+      return mergeAnalyzeIntoBuildingEnriched(stateContextSample, addressAnalyzeResult);
+    }
+    return buildingDetail;
+  }, [addressAnalyzeResult, stateContextSample, buildingDetail]);
+
+  const runSatelliteAnalysis = useCallback(async () => {
+    if (!selectedState) {
+      setError("Select a state first.");
+      return;
+    }
+    setError(null);
+    setSatelliteLoading(true);
+    try {
+      const trimmed = streetAddress.trim();
+      if (trimmed) {
+        const r = await fetchAnalyzeBuilding(trimmed, selectedState);
+        setAddressAnalyzeResult(r);
+      } else {
+        if (!selectedBuildingId) {
+          setError("Select a catalog building or choose an address from search.");
+          return;
+        }
+        setAddressAnalyzeResult(null);
+        const b = await fetchBuilding(selectedBuildingId, true);
+        setBuildingDetail(b);
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Analysis failed");
+    } finally {
+      setSatelliteLoading(false);
+    }
+  }, [selectedState, selectedBuildingId, streetAddress]);
 
   const refreshTopProspects = useCallback(async () => {
     if (!selectedState) return;
@@ -151,8 +208,13 @@ export function useProspecting() {
     buildingDetail,
     topProspects,
     refreshTopProspects,
-    liveCv,
-    setLiveCv,
+    streetAddress,
+    setStreetAddress,
+    addressAnalyzeResult,
+    stateContextSample,
+    economicsBuilding,
+    runSatelliteAnalysis,
+    satelliteLoading,
     error,
     loadingStates,
     loadingBuildings,

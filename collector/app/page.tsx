@@ -40,9 +40,15 @@ export default function Home() {
   const prospecting = useProspecting();
 
   const optimizerKey = `${prospecting.selectedBuildingId}-${prospecting.buildingDetail ? "ok" : "pending"}`;
-  const optimizerLoading = prospecting.loadingDetail && !!prospecting.selectedBuildingId;
+  const optimizerLoading =
+    !!prospecting.selectedBuildingId && (prospecting.loadingDetail || prospecting.satelliteLoading);
   const optimizerError =
-    prospecting.error && !prospecting.buildingDetail && !prospecting.loadingDetail ? prospecting.error : "";
+    prospecting.error &&
+    !prospecting.economicsBuilding &&
+    !prospecting.loadingDetail &&
+    !prospecting.satelliteLoading
+      ? prospecting.error
+      : "";
 
   useEffect(() => {
     const targets = document.querySelectorAll<HTMLElement>("[data-reveal]");
@@ -93,7 +99,13 @@ export default function Home() {
               </p>
             </div>
 
-            <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center reveal" data-reveal>
+            <div className="flex flex-col items-center gap-4 sm:flex-row sm:flex-wrap sm:justify-center reveal" data-reveal>
+              <a
+                href="#rainuse-nexus"
+                className="inline-flex items-center justify-center rounded-full bg-cyan-600 px-8 py-4 text-sm font-semibold text-white shadow-lg shadow-cyan-900/15 transition hover:bg-cyan-700"
+              >
+                RainUSE Nexus
+              </a>
               <a
                 href="#water-economics"
                 className="inline-flex items-center justify-center rounded-full bg-slate-950 px-8 py-4 text-sm font-semibold text-white shadow-lg shadow-slate-900/10 transition hover:bg-slate-800"
@@ -101,10 +113,10 @@ export default function Home() {
                 Water economics
               </a>
               <a
-                href="#prospecting"
+                href="#rainuse-nexus"
                 className="inline-flex items-center justify-center rounded-full border border-slate-300 bg-white px-8 py-4 text-sm font-semibold text-slate-950 transition hover:border-slate-400"
               >
-                Live data
+                Site prospecting
               </a>
             </div>
 
@@ -141,7 +153,7 @@ export default function Home() {
           <div className="reveal" data-reveal>
             <WaterEconomicsSection
               key={optimizerKey}
-              building={prospecting.buildingDetail}
+              building={prospecting.economicsBuilding}
               loading={optimizerLoading}
               backendError={optimizerError}
             />
@@ -236,7 +248,7 @@ export default function Home() {
           <p className="mt-4 text-slate-700">Start with prospecting and state water economics above, or request a full platform demo.</p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
             <a
-              href="#prospecting"
+              href="#rainuse-nexus"
               className="inline-flex items-center justify-center rounded-full bg-slate-950 px-8 py-4 text-sm font-semibold text-white shadow-lg shadow-slate-900/10 transition hover:bg-slate-800"
             >
               Get started
