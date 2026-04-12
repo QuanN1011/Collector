@@ -1,6 +1,6 @@
 {
   "include": ["backend"],
-  "exclude": ["**/__pycache__", "**/.venv", "backend/alembic/versions"],
+  "exclude": ["**/__pycache__", "**/.venv", "backend/migrations/versions"],
   "pythonVersion": "3.12",
   "venvPath": "backend",
   "venv": ".venv",

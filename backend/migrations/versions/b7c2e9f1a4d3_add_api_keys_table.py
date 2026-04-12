@@ -1,7 +1,7 @@
 """add api_keys table for Auth0-issued API keys.
 
 Revision ID: b7c2e9f1a4d3
-Revises: ae01d3c4db89
+Revises: b2f8a1c0d4e1
 Create Date: 2026-04-12
 
 """
@@ -16,7 +16,7 @@ from sqlalchemy import inspect
 
 # revision identifiers, used by Alembic.
 revision: str = "b7c2e9f1a4d3"
-down_revision: Union[str, Sequence[str], None] = "ae01d3c4db89"
+down_revision: Union[str, Sequence[str], None] = "b2f8a1c0d4e1"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

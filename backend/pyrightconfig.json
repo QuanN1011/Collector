@@ -1,6 +1,6 @@
 {
   "include": ["."],
-  "exclude": ["**/__pycache__", ".venv", "alembic/versions"],
+  "exclude": ["**/__pycache__", ".venv", "migrations/versions"],
   "venvPath": ".",
   "venv": ".venv",
   "pythonVersion": "3.12",

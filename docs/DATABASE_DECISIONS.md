@@ -2,12 +2,12 @@
 
 This document records **what we decided** for the relational schema and persistence layer, and **why**, so backend, frontend, and data teammates can align without re-litigating the same topics.
 
-**Stack:** PostgreSQL with **PostGIS** extension, **SQLAlchemy 2** ORM in the Python backend (`backend/database/`), **Alembic** for versioned schema migrations (`backend/alembic/`).  
+**Stack:** PostgreSQL with **PostGIS** extension, **SQLAlchemy 2** ORM in the Python backend (`backend/database/`), **Alembic** for versioned schema migrations (`backend/migrations/`).  
 **Scope:** Hackathon prototype; prefer **simple, conservative** tables with clear paths to extend later.
 
 ### Alembic-style versioned migrations (what that means)
 
-**Alembic** is a migration tool for SQLAlchemy. A **versioned migration** is a small Python (or SQL) script stored in `backend/alembic/versions/` with a unique revision id and a **parent** revision, forming a linear (or branched) history.
+**Alembic** is a migration tool for SQLAlchemy. A **versioned migration** is a small Python (or SQL) script stored in `backend/migrations/versions/` with a unique revision id and a **parent** revision, forming a linear (or branched) history.
 
 - **`alembic upgrade head`** applies every migration that has not run yet, in order, so each environment (laptop, CI, staging) reaches the **same** schema.
 - **`alembic revision -m "describe change"`** adds a new migration file; with **`--autogenerate`**, Alembic compares your SQLAlchemy models to the live database and drafts DDL (you still review/edit, especially for PostGIS).

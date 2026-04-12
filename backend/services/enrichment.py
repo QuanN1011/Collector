@@ -1,4 +1,5 @@
 from models.building import BuildingEnriched, BuildingRecord
+from ai.physical_pipeline import get_physical_analysis
 from ai.cooling_tower_detection import detect_cooling_tower
 from database.db import StateContext, get_state_context, get_stored_final_viability_standalone
 from services.rainwater import annual_rainwater_gallons
@@ -6,17 +7,19 @@ from services.roi import annual_water_savings_usd
 from services.scoring import compute_viability, mock_esg_subscore
 
 
-def enrich_building(record: BuildingRecord, state_ctx: StateContext | None = None) -> BuildingEnriched:
+def enrich_building(record: BuildingRecord, state_ctx: StateContext | None = None, *, live_cv: bool = False) -> BuildingEnriched:
     ctx = state_ctx or get_state_context(record.state)
-    gallons = annual_rainwater_gallons(record.roof_area_sqft, ctx.rainfall_inches_annual)
+    physical = get_physical_analysis(record, force_live=live_cv)
+    catchment = physical.roof_catchment_sqft
+
+    gallons = annual_rainwater_gallons(catchment, ctx.rainfall_inches_annual)
     savings = annual_water_savings_usd(gallons, ctx.water_price_per_1000_gal_usd)
-    tower_ok, tower_conf = detect_cooling_tower(record.id)
     score, breakdown = compute_viability(
-        roof_area_sqft=record.roof_area_sqft,
+        roof_area_sqft=catchment,
         rainfall_inches_annual=ctx.rainfall_inches_annual,
         water_price_per_1000_gal_usd=ctx.water_price_per_1000_gal_usd,
-        cooling_tower_detected=tower_ok,
-        cooling_tower_confidence=tower_conf,
+        cooling_tower_detected=physical.cooling_tower_detected,
+        cooling_tower_confidence=physical.cooling_tower_confidence,
         building_id=record.id,
     )
     stored_final = get_stored_final_viability_standalone(record.id)
@@ -38,7 +41,8 @@ def enrich_building(record: BuildingRecord, state_ctx: StateContext | None = Non
         annual_water_savings=round(savings, 2),
         viability_score=score,
         viability_breakdown=breakdown,
-        cooling_tower_detected=tower_ok,
-        cooling_tower_confidence=tower_conf,
+        cooling_tower_detected=physical.cooling_tower_detected,
+        cooling_tower_confidence=physical.cooling_tower_confidence,
         esg_signal_score=round(esg, 2),
+        physical_analysis=physical,
     )

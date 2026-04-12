@@ -4,18 +4,17 @@ from __future__ import annotations
 
 import os
 from logging.config import fileConfig
+from pathlib import Path
 
+from dotenv import load_dotenv
 from sqlalchemy import create_engine, pool
 
 from alembic import context
 
-from env_load import load_backend_env
-
-load_backend_env()
+# Load backend/.env before reading DATABASE_URL (same as FastAPI main).
+load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
 from database.tables import Base  # noqa: E402
-
-import database.api_keys_dataset  # noqa: F401, E402 — register ApiKey on Base.metadata  # pyright: ignore[reportUnusedImport]
 
 config = context.config
 

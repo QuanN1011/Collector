@@ -47,6 +47,8 @@ def _row_to_building_record(row: BuildingRow) -> BuildingRecord:
         roof_area_sqft=row.roof_area_sqft,
         latitude=row.latitude,
         longitude=row.longitude,
+        data_source=row.data_source,
+        has_footprint_polygon=row.footprint_geom is not None,
     )
 
 
@@ -73,6 +75,8 @@ def _load_buildings_csv() -> tuple[BuildingRecord, ...]:
     with path.open(newline="", encoding="utf-8") as f:
         reader = csv.DictReader(f)
         for row in reader:
+            ds = (row.get("data_source") or "").strip() or None
+            fp_wkt = (row.get("footprint_wkt") or "").strip()
             records.append(
                 BuildingRecord(
                     id=row["id"].strip(),
@@ -82,6 +86,8 @@ def _load_buildings_csv() -> tuple[BuildingRecord, ...]:
                     roof_area_sqft=float(row["roof_area_sqft"]),
                     latitude=_parse_optional_float(row.get("latitude")),
                     longitude=_parse_optional_float(row.get("longitude")),
+                    data_source=ds,
+                    has_footprint_polygon=bool(fp_wkt),
                 )
             )
     return tuple(records)
@@ -93,8 +99,22 @@ def _parse_optional_float(raw: str | None) -> float | None:
     return float(raw)
 
 
-def get_state_context(state: str) -> StateContext:
+def parse_state_code(state: str) -> str:
+    """
+    Normalize and validate a USPS-style state code for prospecting APIs.
+
+    Raises ``ValueError`` if not exactly two ASCII letters (e.g. ``TEX`` or ``9X``).
+    """
     st = state.strip().upper()
+    if len(st) != 2 or not st.isalpha():
+        raise ValueError(
+            f"Invalid state code {state!r}: expected exactly 2 letters (e.g. TX, AZ)."
+        )
+    return st
+
+
+def get_state_context(state: str) -> StateContext:
+    st = parse_state_code(state)
     if use_database():
         SessionLocal = get_session_factory()
         with SessionLocal() as session:
@@ -109,21 +129,39 @@ def get_state_context(state: str) -> StateContext:
 
 
 def list_buildings(state: str | None = None) -> list[BuildingRecord]:
+    st_filter: str | None = None
+    if state is not None:
+        st_filter = parse_state_code(state)
+
     if use_database():
         SessionLocal = get_session_factory()
         with SessionLocal() as session:
             q = select(BuildingRow).order_by(BuildingRow.id)
-            if state is not None:
-                st = state.strip().upper()
-                q = q.where(BuildingRow.state_code == st)
+            if st_filter is not None:
+                q = q.where(BuildingRow.state_code == st_filter)
             rows = session.scalars(q).all()
             return [_row_to_building_record(r) for r in rows]
 
     buildings = list(_load_buildings_csv())
-    if state is None:
+    if st_filter is None:
         return buildings
-    st = state.strip().upper()
-    return [b for b in buildings if b.state == st]
+    return [b for b in buildings if b.state == st_filter]
+
+
+def list_states_with_buildings() -> list[str]:
+    """Sorted USPS codes that have at least one building (Postgres or CSV)."""
+    if use_database():
+        SessionLocal = get_session_factory()
+        with SessionLocal() as session:
+            q = (
+                select(BuildingRow.state_code)
+                .distinct()
+                .order_by(BuildingRow.state_code)
+            )
+            rows = session.execute(q).all()
+            return [r[0] for r in rows]
+
+    return sorted({b.state for b in _load_buildings_csv()})
 
 
 def get_building(building_id: str) -> BuildingRecord | None:
