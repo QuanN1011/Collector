@@ -1,6 +1,7 @@
 # Python backend (RainUSE Nexus)
 backend/.venv/
 backend/.env
+backend/debug_gee_thumbnails/*.png
 backend/**/__pycache__/
 *.py[cod]
 backend/.docs

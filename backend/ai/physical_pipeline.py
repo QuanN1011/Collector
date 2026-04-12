@@ -8,6 +8,8 @@ Physical prospecting signals: roof catchment (catalog + >100k flag), cooling tow
 from __future__ import annotations
 
 import logging
+import re
+from pathlib import Path
 from threading import Lock
 
 from ai.gee_imagery import fetch_sentinel2_thumb_png
@@ -17,8 +19,30 @@ from services.settings import get_settings
 
 logger = logging.getLogger(__name__)
 
+# Visible folder name (no leading dot) so it shows up in Finder / IDE sidebars.
+_DEBUG_THUMB_DIR = Path(__file__).resolve().parent.parent / "debug_gee_thumbnails"
+
 _cache: dict[str, PhysicalAnalysis] = {}
 _cache_lock = Lock()
+
+
+def _safe_thumb_stem(building_id: str) -> str:
+    """Filesystem-safe name for debug PNGs."""
+    s = re.sub(r"[^a-zA-Z0-9._-]+", "_", building_id.strip())
+    return s[:200] if s else "unknown"
+
+
+def _maybe_save_gee_thumb(png: bytes, building_id: str) -> None:
+    settings = get_settings()
+    if not settings.save_gee_thumbnails or not png:
+        return
+    try:
+        _DEBUG_THUMB_DIR.mkdir(parents=True, exist_ok=True)
+        path = _DEBUG_THUMB_DIR / f"{_safe_thumb_stem(building_id)}.png"
+        path.write_bytes(png)
+        logger.info("Saved GEE thumbnail for Gemini to %s", path)
+    except OSError as e:
+        logger.warning("Could not save GEE debug thumbnail: %s", e)
 
 
 def _mock_tower(building_id: str) -> tuple[bool, float]:
@@ -50,6 +74,8 @@ def _live_physical(record: BuildingRecord) -> PhysicalAnalysis:
         return _mock_physical(record)
 
     png = fetch_sentinel2_thumb_png(record.latitude, record.longitude)
+    if png:
+        _maybe_save_gee_thumb(png, record.id)
     if not png:
         p = _mock_physical(record)
         return p.model_copy(

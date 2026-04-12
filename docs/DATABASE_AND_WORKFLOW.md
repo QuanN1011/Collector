@@ -9,7 +9,7 @@ This document describes **important commands** related to the database and a **r
 | Term | Meaning |
 |------|--------|
 | **`DATABASE_URL`** | Connection string for PostgreSQL (set in `backend/.env` or your shell). |
-| **Migration** | A versioned schema change applied by **Alembic** (`backend/alembic/`). |
+| **Migration** | A versioned schema change applied by **Alembic** (`backend/migrations/`). |
 | **`init_db()`** | Backend helper that runs **`alembic upgrade head`** so the DB matches the latest migrations. |
 | **Seed / populate** | Scripts that **insert demo or fixture data** after the schema exists. |
 
@@ -142,4 +142,4 @@ When you change **how** the database is created, seeded, or deployed, update:
 
 ---
 
-*Last aligned with backend layout: `database/`, `alembic/`, `scripts/populate_database.py`, `scripts/seed_database.py`, `docs/DATABASE_SEED_DATA.md`.*
+*Last aligned with backend layout: `database/`, `migrations/`, `scripts/populate_database.py`, `scripts/seed_database.py`, `docs/DATABASE_SEED_DATA.md`.*
