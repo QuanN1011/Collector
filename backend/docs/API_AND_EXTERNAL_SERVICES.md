@@ -146,4 +146,8 @@ If any assertion fails, the script exits with an error so you know something bro
 ## 7. Related docs
 
 - **[VISION_PIPELINE.md](./VISION_PIPELINE.md)** — mock vs live, caching, troubleshooting.  
+- **[CV_IMPLEMENTATION_SUMMARY.md](./CV_IMPLEMENTATION_SUMMARY.md)** — CV handoff: file map, what is implemented vs not yet.  
+- **[DATA_SOURCES_WATER_PRICING.md](./DATA_SOURCES_WATER_PRICING.md)** — using third-party state water cost tables (e.g. [World Population Review](https://worldpopulationreview.com/state-rankings/water-prices-by-state)): units, conversion to `water_price_per_1000_gal_usd`, scrape vs CSV.  
+- **[PROSPECTING.md](./PROSPECTING.md)** — state prospecting: **`GET /states`**, CSV vs Postgres, pilot states TX/AZ/PA, frontend checklist.  
+- **[ROOF_CATCHMENT_LINEAGE.md](./ROOF_CATCHMENT_LINEAGE.md)** — >100k roof flag, **`roof_confidence`** / provenance (catalog vs CV).  
 - **OpenAPI UI** — run `uvicorn` and open `http://127.0.0.1:8000/docs` to try endpoints interactively.

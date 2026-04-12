@@ -12,6 +12,8 @@ def get_buildings(state: str | None = Query(None, description="US state code, e.
     if state is not None:
         try:
             get_state_context(state)
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e)) from e
         except KeyError as e:
             raise HTTPException(status_code=400, detail=str(e)) from e
     records = list_buildings(state)

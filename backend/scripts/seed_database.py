@@ -260,6 +260,15 @@ def seed(
                 fp_wkt = fp_wkt_raw
             else:
                 fp_wkt = footprint_multipolygon_wkt(lat, lon, roof)
+            ds_raw = (row.get("data_source") or "").strip() or None
+            if ds_raw is None:
+                data_source = (
+                    "microsoft_us_building_footprints"
+                    if fp_wkt_raw
+                    else "synthetic_commercial_seed"
+                )
+            else:
+                data_source = ds_raw
             session.add(
                 Building(
                     id=bid,
@@ -272,6 +281,7 @@ def seed(
                     land_use_type=(row.get("land_use_type") or "").strip() or None,
                     latitude=lat,
                     longitude=lon,
+                    data_source=data_source,
                     footprint_geom=WKTElement(fp_wkt, srid=4326),
                 )
             )

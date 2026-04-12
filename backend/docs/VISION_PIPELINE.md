@@ -2,7 +2,10 @@
 
 This document explains how the backend combines **building catalog data**, **Google Earth Engine (GEE)**, and **Gemini** to satisfy the hackathon “physical targets + confidence” story.
 
-**See also:** [API_AND_EXTERNAL_SERVICES.md](./API_AND_EXTERNAL_SERVICES.md) — REST API vs EE vs Gemini, a full request example, and what **`smoke_test.py`** does.
+**See also:**
+
+- [API_AND_EXTERNAL_SERVICES.md](./API_AND_EXTERNAL_SERVICES.md) — REST API vs EE vs Gemini, a full request example, and what **`smoke_test.py`** does.
+- [CV_IMPLEMENTATION_SUMMARY.md](./CV_IMPLEMENTATION_SUMMARY.md) — **handoff summary**: file-by-file CV story, what you built vs what is not done yet.
 
 ## 1. What the rubric asks for
 
@@ -16,9 +19,11 @@ This document explains how the backend combines **building catalog data**, **Goo
 | Layer | Source | What you get |
 |--------|--------|----------------|
 | **Catalog** | `data/buildings.csv` (later Postgres) | `roof_area_sqft`, `latitude`, `longitude`. Treated as **Open Buildings–style** footprint / catchment for the MVP. |
-| **Satellite + vision** | GEE → RGB chip; Gemini → interpretation | Cooling-tower **likelihood** + **confidence**; chip **provenance** bumps roof confidence when imagery is available. |
+| **Satellite + vision** | GEE → RGB chip; Gemini → interpretation | Cooling-tower **likelihood** + **confidence**. |
 
-**Important:** Roof **geometry from pure CV segmentation** (drawing a polygon from pixels) is **not** implemented. Catchment area for rainwater math is the **catalog** value. The satellite path is there to support **tower detection** and to demonstrate the **GEE → image → model** pipeline for judges.
+**Important:** Roof **geometry from pure CV segmentation** (drawing a polygon from pixels) is **not** implemented. Catchment area for rainwater math is the **catalog** value. **`roof_confidence`** and **`roof_catchment_provenance`** describe **data lineage** (e.g. Microsoft footprints vs synthetic seed), **not** satellite-derived roof measurement. The satellite path supports **tower detection** and the **GEE → image → model** demo.
+
+**See:** [ROOF_CATCHMENT_LINEAGE.md](./ROOF_CATCHMENT_LINEAGE.md).
 
 ## 3. End-to-end flow
 

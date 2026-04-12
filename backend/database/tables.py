@@ -129,6 +129,7 @@ class Building(Base):
 
     latitude: Mapped[float | None] = mapped_column(Float, nullable=True)
     longitude: Mapped[float | None] = mapped_column(Float, nullable=True)
+    data_source: Mapped[str | None] = mapped_column(String(64), nullable=True)
     footprint_geom: Mapped[object | None] = mapped_column(
         Geometry("MULTIPOLYGON", srid=4326),
         nullable=True,

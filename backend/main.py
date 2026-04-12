@@ -11,6 +11,7 @@ from database.config import get_database_url
 from database.engine import init_db
 from routes.buildings import router as buildings_router, single_router as building_single_router
 from routes.prospects import router as prospects_router
+from routes.states import router as states_router
 
 
 @asynccontextmanager
@@ -36,6 +37,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(states_router)
 app.include_router(buildings_router)
 app.include_router(building_single_router)
 app.include_router(prospects_router)

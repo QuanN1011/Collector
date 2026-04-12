@@ -14,6 +14,8 @@ def get_top_prospects(
 ) -> list[BuildingEnriched]:
     try:
         get_state_context(state)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
     except KeyError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
     enriched = [enrich_building(r, live_cv=False) for r in list_buildings(state)]
