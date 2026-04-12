@@ -1,0 +1,16 @@
+id,company_name,ticker,cik,industry,website,hq_state
+cmp-amzn,Amazon.com Inc,AMZN,0001018724,Logistics / E-commerce,https://www.amazon.com,WA
+cmp-wmt,Walmart Inc,WMT,0000104169,Retail,https://www.walmart.com,AR
+cmp-tgt,Target Corporation,TGT,0000027419,Retail,https://www.target.com,MN
+cmp-fdx,FedEx Corporation,FDX,0001048911,Freight / Logistics,https://www.fedex.com,TN
+cmp-ups,United Parcel Service Inc,UPS,0001090727,Freight / Logistics,https://www.ups.com,GA
+cmp-tsla,Tesla Inc,TSLA,0001318605,Automotive / Energy,https://www.tesla.com,TX
+cmp-gm,General Motors Co,GM,0001467858,Automotive,https://www.gm.com,MI
+cmp-intc,Intel Corporation,INTC,0000050863,Semiconductors,https://www.intel.com,CA
+cmp-mu,Micron Technology Inc,MU,0000723125,Semiconductors,https://www.micron.com,ID
+cmp-ko,Coca-Cola Company,KO,0000021344,Beverages,https://www.coca-colacompany.com,GA
+cmp-pep,PepsiCo Inc,PEP,0000077476,Beverages / Snacks,https://www.pepsico.com,NY
+cmp-xom,Exxon Mobil Corporation,XOM,0000034088,Energy / Chemicals,https://www.exxonmobil.com,TX
+cmp-cvs,CVS Health Corporation,CVS,0000064803,Healthcare / Retail,https://www.cvshealth.com,RI
+cmp-hd,Home Depot Inc,HD,0000354950,Retail / Industrial supply,https://www.homedepot.com,GA
+cmp-nke,Nike Inc,NKE,0000320187,Apparel / Manufacturing,https://www.nike.com,OR

@@ -12,7 +12,8 @@ Who provides the data?
 What this script does
 ---------------------
 1. Runs Alembic migrations (``init_db`` via ``seed_database.seed``).
-2. Loads ``data/state_context.csv`` and ``data/buildings.csv`` (see ``seed_database.py``).
+2. Loads bundled CSVs and derives related rows (companies, imagery metadata, CV detections,
+   physical features, yields, utilities, policies, and ``building_scores``). See ``backend/SEED.md``.
 3. Optionally **merges** rows from ``data/imports/state_context_overrides.csv`` if that file
    exists (per-state updates without editing the large ``state_context.csv``).
 
@@ -100,7 +101,7 @@ def main() -> None:
     args = parser.parse_args()
 
     seed_mod = _load_seed_module()
-    print("Running seed (migrations + state_context + buildings + building_scores)...")
+    print("Running seed (migrations + full RainUSE MVP fixture load)...")
     seed_mod.seed()
 
     if args.no_overrides:

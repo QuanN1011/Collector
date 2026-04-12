@@ -84,6 +84,8 @@ python scripts/seed_database.py
 
 Optional: copy `data/imports/state_context_overrides.csv.example` to `data/imports/state_context_overrides.csv` and adjust, then run `populate_database.py` again.
 
+**Data provenance (what is real vs synthetic, APIs vs generated, CV not required for Microsoft/API ingest):** see [`docs/DATA_SOURCES_REAL_VS_GENERATED.md`](DATA_SOURCES_REAL_VS_GENERATED.md). Deeper lineage: [`docs/DATABASE_SEED_DATA.md`](DATABASE_SEED_DATA.md). Operational notes: [`backend/SEED.md`](../backend/SEED.md).
+
 ### 2.6 Run the API
 
 ```bash
@@ -117,7 +119,7 @@ Pulling can change **dependencies**, **migrations**, **seed CSVs**, or **scripts
 | 3 | **DB schema:** With `DATABASE_URL` set, run **`alembic upgrade head`** **or** start the API once so **`init_db()`** runs. |
 | 4 | **Data (if fixtures changed or DB empty):** `python scripts/populate_database.py` or `seed_database.py`. |
 | 5 | **Frontend deps:** `cd collector && npm install` (if `package-lock.json` changed). |
-| 6 | **Re-read docs:** If `docs/` or `README` changed, skim **`docs/DATABASE_DECISIONS.md`** and **this file** for new commands or env vars. |
+| 6 | **Re-read docs:** If `docs/` or `README` changed, skim **`docs/DATABASE_DECISIONS.md`**, **`docs/DATA_SOURCES_REAL_VS_GENERATED.md`** (real vs generated data), **`docs/DATABASE_SEED_DATA.md`**, and **this file** for new commands or env vars. |
 
 If a teammate added a **new Alembic revision**, step 3 is mandatory before relying on old data.
 
@@ -134,8 +136,10 @@ If **`DATABASE_URL`** is **unset**, the API reads **`backend/data/*.csv`** only;
 When you change **how** the database is created, seeded, or deployed, update:
 
 - **`docs/DATABASE_DECISIONS.md`** — product/schema *decisions*.
+- **`docs/DATA_SOURCES_REAL_VS_GENERATED.md`** — *real ingest vs generated*, *CV vs APIs*, and *script index*.
+- **`docs/DATABASE_SEED_DATA.md`** — *sources*, *inferred fields*, and *fixture lineage* for seeded data.
 - **`docs/DATABASE_AND_WORKFLOW.md`** (this file) — *commands* and *pull/update* routine.
 
 ---
 
-*Last aligned with backend layout: `database/`, `alembic/`, `scripts/populate_database.py`, `scripts/seed_database.py`.*
+*Last aligned with backend layout: `database/`, `alembic/`, `scripts/populate_database.py`, `scripts/seed_database.py`, `docs/DATABASE_SEED_DATA.md`.*
