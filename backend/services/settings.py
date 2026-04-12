@@ -1,4 +1,4 @@
-"""Environment-driven flags for Earth Engine + Gemini (optional for local dev)."""
+"""Environment-driven flags for live CV (Static Maps + Gemini) and optional Earth Engine utilities."""
 
 import os
 from functools import lru_cache
@@ -9,11 +9,13 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 def live_cv_enabled(settings: "Settings") -> bool:
     """
-    Whether the live GEE + Gemini path is allowed when the client sends ``live_cv=true``.
+    Whether live CV is allowed when the client sends ``live_cv=true``.
+
+    Live CV uses **Google Static Maps** + **Gemini** (not Earth Engine).
 
     - ``ENABLE_LIVE_CV=false`` / ``0`` / ``off`` → never live (stay on mock).
     - ``ENABLE_LIVE_CV=true`` / ``1`` / ``on`` → allow live (still needs credentials to succeed).
-    - Unset or empty → **auto**: allow live when both ``GEMINI_API_KEY`` and ``GEE_PROJECT_ID`` are set.
+    - Unset or empty → **auto**: allow when ``GEMINI_API_KEY`` and ``GOOGLE_MAPS_API_KEY`` are set.
     """
     raw = os.environ.get("ENABLE_LIVE_CV")
     if raw is not None and raw.strip() != "":
@@ -22,12 +24,16 @@ def live_cv_enabled(settings: "Settings") -> bool:
             return False
         if v in ("1", "true", "yes", "on"):
             return True
-    return bool(settings.gemini_api_key and settings.gee_project_id)
+    return bool(settings.gemini_api_key and settings.google_maps_api_key)
 
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
+    google_maps_api_key: str | None = Field(
+        default=None,
+        description="Maps Platform key: Geocoding + Static Maps for GET /analyze-building",
+    )
     gee_project_id: str | None = Field(default=None, description="Google Cloud / Earth Engine project id")
     gemini_api_key: str | None = Field(default=None, description="Google AI Studio / Gemini API key")
     gemini_model: str = Field(default="gemini-2.0-flash")

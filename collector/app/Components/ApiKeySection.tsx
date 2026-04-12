@@ -34,10 +34,14 @@ function CopyClipboardIcon({ className }: { className?: string }) {
 export function ApiKeySection() {
   if (!isAuth0Configured()) {
     return (
-      <section className="relative border-t border-slate-100 bg-white py-16 px-6 text-center sm:px-10 lg:px-16">
-        <div className="mx-auto max-w-3xl">
-          <h2 className="text-3xl font-semibold text-slate-950">API key</h2>
-          <p className="mt-8 text-sm text-slate-600">Configure Auth0 (NEXT_PUBLIC_AUTH0_*) to enable API keys.</p>
+      <section
+        id="rainuse-api-key"
+        className="relative scroll-mt-24 border-t border-slate-200/80 bg-gradient-to-b from-slate-50 to-white py-14 px-6 sm:px-10 lg:px-16"
+      >
+        <div className="mx-auto max-w-3xl text-center">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-700">Developer</p>
+          <h2 className="mt-2 text-2xl font-semibold text-slate-950">RainUSE API key</h2>
+          <p className="mt-3 text-sm text-slate-600">Configure Auth0 (<code className="rounded bg-slate-100 px-1.5 py-0.5 text-xs">NEXT_PUBLIC_AUTH0_*</code>) to enable API keys.</p>
         </div>
       </section>
     );
@@ -106,18 +110,23 @@ function ApiKeySectionInner() {
   }, [isAuthenticated, emailVerified, getAccessTokenSilently]);
 
   return (
-    <section className="relative border-t border-slate-100 bg-white py-16 px-6 text-center sm:px-10 lg:px-16">
-      <div className="mx-auto max-w-3xl reveal" data-reveal>
-        <h2 className="text-3xl font-semibold text-slate-950">API key</h2>
+    <section
+      id="rainuse-api-key"
+      className="relative scroll-mt-24 border-t border-cyan-200/50 bg-gradient-to-b from-cyan-50/40 via-white to-slate-50 py-14 px-6 sm:px-10 lg:px-16"
+    >
+      <div className="mx-auto max-w-2xl reveal rounded-[1.75rem] border border-slate-200/80 bg-white/90 px-8 py-10 text-center shadow-sm shadow-slate-200/50 sm:px-10" data-reveal>
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-700">Developer</p>
+        <h2 className="mt-2 text-2xl font-semibold text-slate-950">RainUSE API key</h2>
+        <p className="mt-2 text-sm text-slate-600">Issue a key for authenticated API calls (same flow as Settings).</p>
 
         <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
           <button
             type="button"
             disabled={busy || isLoading}
             onClick={() => void handleGetApiKey()}
-            className="inline-flex items-center justify-center rounded-full bg-slate-950 px-8 py-4 text-sm font-semibold text-white shadow-lg shadow-slate-900/10 transition hover:bg-slate-800 disabled:opacity-60"
+            className="inline-flex items-center justify-center rounded-full bg-cyan-600 px-8 py-3.5 text-sm font-semibold text-white shadow-md shadow-cyan-900/15 transition hover:bg-cyan-700 disabled:opacity-60"
           >
-            {busy || isLoading ? "…" : "Get api key"}
+            {busy || isLoading ? "…" : "Get API key"}
           </button>
         </div>
 

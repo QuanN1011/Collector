@@ -117,7 +117,7 @@ def main() -> int:
             f"imagery={pa['imagery_source']!r} backend={pa['vision_backend']!r}"
         )
     else:
-        print("SKIP live CV (set RUN_LIVE_CV=1 to exercise GEE+Gemini — first call can take 30–90s)")
+        print("SKIP live CV (set RUN_LIVE_CV=1 to exercise Static Maps+Gemini — first call can take 10–60s)")
 
     print("\nAll smoke checks passed.")
     return 0

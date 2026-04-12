@@ -72,8 +72,8 @@ function HeaderWithoutAuth0() {
           </div>
 
           <nav className="hidden items-center gap-8 md:flex">
-            <a href="#prospecting" className={`text-sm font-medium transition hover:opacity-80 ${tc}`}>
-              Prospecting
+            <a href="#rainuse-nexus" className={`text-sm font-medium transition hover:opacity-80 ${tc}`}>
+              RainUSE Nexus
             </a>
             <a href="#water-economics" className={`text-sm font-medium transition hover:opacity-80 ${tc}`}>
               Water economics
@@ -113,8 +113,8 @@ function HeaderWithAuth0() {
           </div>
 
           <nav className="hidden items-center gap-8 md:flex">
-            <a href="#prospecting" className={`text-sm font-medium transition hover:opacity-80 ${tc}`}>
-              Prospecting
+            <a href="#rainuse-nexus" className={`text-sm font-medium transition hover:opacity-80 ${tc}`}>
+              RainUSE Nexus
             </a>
             <a href="#water-economics" className={`text-sm font-medium transition hover:opacity-80 ${tc}`}>
               Water economics
