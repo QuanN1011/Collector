@@ -10,12 +10,14 @@
   },
   "dependencies": {
     "gsap": "^3.14.2",
+    "@auth0/auth0-react": "^2.16.1",
     "next": "16.2.3",
     "react": "^19.2.5",
     "react-dom": "^19.2.5"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/google.maps": "^3.58.1",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

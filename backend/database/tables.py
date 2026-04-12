@@ -129,6 +129,7 @@ class Building(Base):
 
     latitude: Mapped[float | None] = mapped_column(Float, nullable=True)
     longitude: Mapped[float | None] = mapped_column(Float, nullable=True)
+    data_source: Mapped[str | None] = mapped_column(String(64), nullable=True)
     footprint_geom: Mapped[object | None] = mapped_column(
         Geometry("MULTIPOLYGON", srid=4326),
         nullable=True,
@@ -167,6 +168,36 @@ class Building(Base):
         back_populates="building",
         cascade="all, delete-orphan",
     )
+    cv_analysis: Mapped["BuildingCvAnalysis | None"] = relationship(
+        back_populates="building",
+        uselist=False,
+        cascade="all, delete-orphan",
+    )
+
+
+class BuildingCvAnalysis(Base):
+    """
+    Cached Static Maps + Gemini roof/tower analysis for ``?live_cv=true``.
+
+    One row per building; overwritten on re-run.
+    """
+
+    __tablename__ = "building_cv_analysis"
+
+    building_id: Mapped[str] = mapped_column(
+        String,
+        ForeignKey("buildings.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    roof_estimated_sqft: Mapped[float] = mapped_column(Float, nullable=False)
+    roof_large_flag: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    cooling_tower_detected: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    roof_confidence: Mapped[float] = mapped_column(Float, nullable=False)
+    cooling_tower_confidence: Mapped[float] = mapped_column(Float, nullable=False)
+    reasoning: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+    building: Mapped[Building] = relationship(back_populates="cv_analysis")
 
 
 class ImageryAsset(Base):
@@ -303,3 +334,5 @@ class BuildingScore(Base):
     computed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     building: Mapped[Building] = relationship(back_populates="scores")
+
+# API keys: see ``database.api_keys_dataset`` (separate module to reduce merge churn).

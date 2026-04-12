@@ -1,0 +1,13 @@
+{
+  "name": "collector-workspace",
+  "private": true,
+  "scripts": {
+    "setup": "npm install && npm install --prefix collector",
+    "dev": "concurrently -n backend,frontend -c blue,green \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd backend && PYTHONPATH=. uvicorn main:app --reload --host 127.0.0.1 --port 8000",
+    "dev:frontend": "npm run dev --prefix collector"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

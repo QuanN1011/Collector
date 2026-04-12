@@ -1,45 +1,17 @@
 "use client";
 
 import { useEffect, useMemo, useState, useRef } from "react";
+import { useEffect } from "react";
+import { AuthBar } from "./Components/AuthBar";
+import { EmailVerificationBanner } from "@/app/Components/EmailVerificationBanner";
+import { SettingsMenu } from "@/app/Components/SettingsMenu";
 import InteractiveTopUI from "./Components/InteractiveTopUI";
 import Header from "./Components/Header";
 import Footer from "./Components/Footer";
-
-type BuildingEnriched = {
-  id: string;
-  name: string;
-  state: string;
-  city?: string | null;
-  roof_area_sqft: number;
-  rainfall_inches_annual: number;
-  water_price_per_1000_gal_usd: number;
-  rainwater_potential_gallons: number;
-  annual_water_savings: number;
-  viability_score: number;
-  viability_breakdown: Record<string, number>;
-  cooling_tower_detected: boolean;
-  cooling_tower_confidence: number;
-  esg_signal_score: number;
-  data_notes: string;
-};
-
-const INITIALS = {
-  dailyVolume: 250,
-  sourceElevation: 100,
-  destinationElevation: 132,
-  pipeLength: 2,
-  pumpEfficiency: 72,
-  pumpCount: 1,
-};
-
-const BACKEND_BASE = "http://localhost:8000";
-
-function formatNumber(value: number, digits = 1) {
-  return value.toLocaleString(undefined, {
-    maximumFractionDigits: digits,
-    minimumFractionDigits: digits,
-  });
-}
+import ProspectingSection from "./Components/ProspectingSection";
+import WaterEconomicsSection from "./Components/WaterEconomicsSection";
+import { ApiKeySection } from "./Components/ApiKeySection";
+import { useProspecting } from "../lib/useProspecting";
 
 function HeroLines() {
   return (
@@ -149,6 +121,18 @@ export default function Home() {
     const suggestedPumps = Math.max(1, Math.ceil(flowLps / 20));
     return { flowLps, head, powerKw, energyKwh, costPerDay, suggestedPumps };
   }, [dailyVolume, destinationElevation, sourceElevation, pipeLength, pumpEfficiency]);
+  const prospecting = useProspecting();
+
+  const optimizerKey = `${prospecting.selectedBuildingId}-${prospecting.buildingDetail ? "ok" : "pending"}`;
+  const optimizerLoading =
+    !!prospecting.selectedBuildingId && (prospecting.loadingDetail || prospecting.satelliteLoading);
+  const optimizerError =
+    prospecting.error &&
+    !prospecting.economicsBuilding &&
+    !prospecting.loadingDetail &&
+    !prospecting.satelliteLoading
+      ? prospecting.error
+      : "";
 
   useEffect(() => {
     const targets = document.querySelectorAll<HTMLElement>("[data-reveal]");
@@ -181,6 +165,13 @@ export default function Home() {
   return (
     <div className="relative overflow-x-hidden bg-white text-[#3e3d3c]">
       <Header navOpacity={navOpacity} />
+    <div className="relative overflow-x-hidden bg-slate-50 text-slate-950">
+      <Header />
+      <div className="fixed right-4 top-20 z-[60] flex flex-col items-end gap-2 sm:right-6 sm:top-24">
+        <AuthBar />
+        <EmailVerificationBanner />
+        <SettingsMenu />
+      </div>
 
       {/* Hero Section */}
       <section className="relative min-h-screen overflow-hidden pt-20 bg-white">
@@ -221,6 +212,7 @@ export default function Home() {
               <img src="/pls.svg" className="w-full h-full object-contain" alt="Pls" />
             </div>
         </div>
+        <div className="absolute inset-0 z-[1] bg-gradient-to-b from-white/60 via-white/40 to-slate-50/40" />
 
         <main className="relative z-10 mx-auto flex flex-col gap-6 px-6 sm:px-10 lg:px-16 pt-8">
           {/* Hero Section */}
@@ -236,22 +228,32 @@ export default function Home() {
                 Modern water systems, smarter management.
               </h1>
               <p className="mx-auto max-w-2xl text-base leading-8 text-slate-700 sm:text-lg">
-                Collector combines rainwater capture modeling, pump optimization, and live operations data into one integrated platform for water infrastructure.
+                Collector combines rainwater capture, state-level water economics, and prospecting signals into one view for water infrastructure decisions.
               </p>
             </div>
 
-            <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center reveal" data-reveal>
+            <div className="flex flex-col items-center gap-4 sm:flex-row sm:flex-wrap sm:justify-center reveal" data-reveal>
+              <a
+                href="#rainuse-nexus"
+                className="inline-flex items-center justify-center rounded-full bg-cyan-600 px-8 py-4 text-sm font-semibold text-white shadow-lg shadow-cyan-900/15 transition hover:bg-cyan-700"
+              >
+                RainUSE Nexus
+              </a>
               <a
                 href="#optimizer"
                 className="inline-flex items-center justify-center rounded-full bg-[#3e3d3c] px-8 py-4 text-sm font-semibold text-white shadow-lg shadow-[#3e3d3c]/10 transition hover:bg-[#2c2b2a]"
+                href="#water-economics"
+                className="inline-flex items-center justify-center rounded-full bg-slate-950 px-8 py-4 text-sm font-semibold text-white shadow-lg shadow-slate-900/10 transition hover:bg-slate-800"
               >
-                Try optimizer
+                Water economics
               </a>
               <a
                 href="#features"
                 className="inline-flex items-center justify-center rounded-full border border-slate-300 bg-white px-8 py-4 text-sm font-semibold text-[#3e3d3c] transition hover:border-slate-400"
+                href="#rainuse-nexus"
+                className="inline-flex items-center justify-center rounded-full border border-slate-300 bg-white px-8 py-4 text-sm font-semibold text-slate-950 transition hover:border-slate-400"
               >
-                Learn more
+                Site prospecting
               </a>
             </div>
           </section>
@@ -287,18 +289,22 @@ export default function Home() {
         </div>
       </div>
 
-      {/* MVP Optimizer Section */}
-      <section id="optimizer" className="relative py-20 px-6 sm:px-10 lg:px-16 bg-slate-50">
+      <ProspectingSection model={prospecting} />
+
+      <section id="water-economics" className="relative scroll-mt-24 py-20 px-6 sm:px-10 lg:px-16 bg-slate-50">
         <div className="mx-auto max-w-7xl">
           <div className="mb-12 space-y-4 text-center reveal" data-reveal>
             <p className="inline-flex rounded-full bg-cyan-500/10 px-4 py-2 text-sm font-semibold uppercase tracking-[0.28em] text-cyan-700 mx-auto">
-              Pumping Optimizer
+              Water economics
             </p>
             <h2 className="text-4xl font-semibold tracking-tight text-[#3e3d3c] sm:text-5xl">
               Design your system with confidence.
+            <h2 className="text-4xl font-semibold tracking-tight text-slate-950 sm:text-5xl">
+              State rates &amp; rainwater value
             </h2>
             <p className="mx-auto max-w-2xl text-slate-700">
-              Configure your water system parameters and instantly see energy consumption, head calculations, and cost estimates.
+              Tie public state water tables to your model: reference $/1,000 gal and rainfall drive savings. Stress-test rates to
+              see how the same capture volume changes in value.
             </p>
           </div>
 
@@ -466,6 +472,13 @@ export default function Home() {
                 </ul>
               </div>
             </div>
+          <div className="reveal" data-reveal>
+            <WaterEconomicsSection
+              key={optimizerKey}
+              building={prospecting.economicsBuilding}
+              loading={optimizerLoading}
+              backendError={optimizerError}
+            />
           </div>
         </div>
       </section>
@@ -491,8 +504,10 @@ export default function Home() {
             <div className="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-[0_20px_60px_rgba(15,23,42,0.06)]">
               <p className="text-xs uppercase tracking-[0.28em] text-slate-500">Optimize</p>
               <h3 className="mt-4 text-xl font-semibold text-[#3e3d3c]">Pump & energy forecasting</h3>
+              <p className="text-xs uppercase tracking-[0.28em] text-slate-500">Economics</p>
+              <h3 className="mt-4 text-xl font-semibold text-slate-950">State rates &amp; savings</h3>
               <p className="mt-3 text-sm leading-7 text-slate-600">
-                Balance head, flow, and efficiency in an intuitive model that speaks to teams and operators alike.
+                Connect public water-price tables to modeled capture and stress-test utility rates against the same site.
               </p>
             </div>
 
@@ -559,6 +574,12 @@ export default function Home() {
             <a
               href="#optimizer"
               className="inline-flex items-center justify-center rounded-full bg-[#3e3d3c] px-8 py-4 text-sm font-semibold text-white shadow-lg shadow-[#3e3d3c]/10 transition hover:bg-[#2c2b2a]"
+          <h2 className="text-3xl font-semibold text-slate-950">Ready to optimize your water systems?</h2>
+          <p className="mt-4 text-slate-700">Start with prospecting and state water economics above, or request a full platform demo.</p>
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
+            <a
+              href="#rainuse-nexus"
+              className="inline-flex items-center justify-center rounded-full bg-slate-950 px-8 py-4 text-sm font-semibold text-white shadow-lg shadow-slate-900/10 transition hover:bg-slate-800"
             >
               Get started
             </a>
@@ -571,6 +592,8 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      <ApiKeySection />
 
       <Footer />
     </div>

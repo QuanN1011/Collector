@@ -41,9 +41,10 @@ export default function Footer() {
           <div>
             <h3 className="font-semibold text-[#3e3d3c] mb-4">Product</h3>
             <ul className="space-y-2 text-sm text-slate-600">
-              <li><a href="#optimizer" className="hover:text-[#3e3d3c] transition">Pumping Optimizer</a></li>
-              <li><a href="#features" className="hover:text-[#3e3d3c] transition">Features</a></li>
-              <li><a href="#about" className="hover:text-[#3e3d3c] transition">Platform</a></li>
+              <li><a href="#rainuse-nexus" className="hover:text-slate-950 transition">RainUSE Nexus</a></li>
+              <li><a href="#water-economics" className="hover:text-slate-950 transition">Water economics</a></li>
+              <li><a href="#features" className="hover:text-slate-950 transition">Features</a></li>
+              <li><a href="#about" className="hover:text-slate-950 transition">Platform</a></li>
             </ul>
           </div>
 

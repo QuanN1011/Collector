@@ -84,6 +84,7 @@ python scripts/seed_database.py \
 
 ## 5. Related docs
 
+- [`DATA_SOURCES.md`](DATA_SOURCES.md) — **Index** of where bundled CSVs (especially `state_context.csv`) come from, and why the viability headline can change without other KPIs moving.  
 - [`DATABASE_SEED_DATA.md`](DATABASE_SEED_DATA.md) — Full provenance, CSV → table mapping, API vs synthetic overview.  
 - [`backend/SEED.md`](../backend/SEED.md) — Short runbook.  
 - [`DATABASE_AND_WORKFLOW.md`](DATABASE_AND_WORKFLOW.md) — Docker, migrations, populate commands.

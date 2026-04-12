@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { AuthProvider } from "./providers";
 import "./globals.css";
 import Cursor from "./Components/Cursor";
 
@@ -26,6 +27,9 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <Cursor />
         {children}
+    <html lang="en" className={`${inter.variable} h-full antialiased`} suppressHydrationWarning>
+      <body className="min-h-full flex flex-col" suppressHydrationWarning>
+        <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
   );

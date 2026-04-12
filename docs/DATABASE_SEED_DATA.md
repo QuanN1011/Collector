@@ -4,6 +4,10 @@ This document records **where MVP fixture data comes from**, **what is inferred 
 
 **Quick reference (real vs generated, CV vs APIs):** [`DATA_SOURCES_REAL_VS_GENERATED.md`](DATA_SOURCES_REAL_VS_GENERATED.md).
 
+**Index of file provenance (including `state_context.csv`):** [`DATA_SOURCES.md`](DATA_SOURCES.md).
+
+**Full data inventory (DB + APIs + UI):** [`DATA_INVENTORY.md`](DATA_INVENTORY.md).
+
 ---
 
 ## 1. What you need to populate the database
@@ -85,7 +89,7 @@ These are **derived during seeding** in `seed_database.py` + `services/seed_scor
 | `policy_drivers` | Copied from per-state **templates** per building (repeated policy themes across buildings in the same state). |
 | `building_scores` | All pillar scores 0–100 and **weighted** `final_viability_score` (`FINAL_WEIGHTS` in `seed_scoring.py`); `opportunity_tier` from thresholds. |
 
-The API layer ([`backend/services/enrichment.py`](../backend/services/enrichment.py)) still computes a **viability breakdown** with [`services/scoring.compute_viability`](../backend/services/scoring.py) for responses, but may **override the headline score** with the persisted `building_scores.final_viability_score` when present—so the **stored rollup** is the canonical demo score in the database even if the live breakdown components differ slightly.
+The API layer ([`backend/services/enrichment.py`](../backend/services/enrichment.py)) computes a **viability breakdown** with [`services/scoring.compute_viability`](../backend/services/scoring.py). It **overrides the headline** with persisted `building_scores.final_viability_score` when present **and** the request is not **`live_cv=true`**—so default detail matches seeded rollups; Satellite + AI detail uses the computed headline. See [`DATA_SOURCES.md`](DATA_SOURCES.md).
 
 ---
 

@@ -41,7 +41,7 @@ def init_db() -> None:
     backend_root = Path(__file__).resolve().parent.parent
     alembic_ini = backend_root / "alembic.ini"
     cfg = Config(str(alembic_ini))
-    cfg.set_main_option("script_location", str(backend_root / "alembic"))
+    cfg.set_main_option("script_location", str(backend_root / "migrations"))
     command.upgrade(cfg, "head")
 
 

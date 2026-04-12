@@ -1,12 +1,14 @@
 """
-Viability score 0–100: weighted blend of physical fit, water economics, and mock signals.
+Viability score 0–100: weighted blend of water economics, climate, and tower / mock signals.
+
+Prospecting only includes **large commercial roofs (≥100k sq ft)**, so a separate roof pillar
+does not vary meaningfully and is omitted.
 
 Weights (must sum to 1.0):
-- roof: 0.35  — large commercial roofs (>100k sq ft) score highest
-- rainfall: 0.25 — more annual precipitation → more harvest
-- water_price: 0.15 — higher utility cost → stronger ROI proxy
-- cooling_tower: 0.15 — towers increase evaporative load / reuse value (mock)
-- esg: 0.10 — optional corporate sustainability signal (mock)
+- rainfall: 0.35 — more annual precipitation → more harvest
+- water_price: 0.25 — higher utility cost → stronger ROI proxy
+- cooling_tower: 0.25 — towers increase evaporative load / reuse value (mock or live CV)
+- esg_mock: 0.15 — placeholder corporate sustainability signal (mock until real ESG data)
 """
 
 from __future__ import annotations
@@ -57,21 +59,14 @@ def compute_viability(
     cooling_tower_confidence: float,
     building_id: str,
 ) -> tuple[float, dict[str, float]]:
-    r = roof_subscore(roof_area_sqft)
+    _ = roof_area_sqft  # still passed for API stability; prospecting uses ≥100k sq ft only
     rain = rainfall_subscore(rainfall_inches_annual)
     price = water_price_subscore(water_price_per_1000_gal_usd)
     tower = cooling_tower_subscore(cooling_tower_detected, cooling_tower_confidence)
     esg = mock_esg_subscore(building_id)
 
-    total = (
-        0.35 * r
-        + 0.25 * rain
-        + 0.15 * price
-        + 0.15 * tower
-        + 0.10 * esg
-    )
+    total = 0.35 * rain + 0.25 * price + 0.25 * tower + 0.15 * esg
     breakdown = {
-        "roof": round(r, 2),
         "rainfall": round(rain, 2),
         "water_price": round(price, 2),
         "cooling_tower": round(tower, 2),

@@ -16,6 +16,7 @@ Data notes
 
 Usage (from backend/)::
 
+  # DATABASE_URL in .env (see .env.example) or exported in the shell
   export DATABASE_URL=postgresql+psycopg://rainuse:rainuse@localhost:5432/rainuse
   python scripts/seed_database.py
   python scripts/seed_database.py --buildings-csv data/buildings_microsoft.csv
@@ -26,11 +27,22 @@ from __future__ import annotations
 
 import argparse
 import csv
+import sys
 from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 
+# Running `python scripts/seed_database.py` puts `scripts/` on sys.path first, not `backend/`.
+_BACKEND_ROOT = Path(__file__).resolve().parent.parent
+if str(_BACKEND_ROOT) not in sys.path:
+    sys.path.insert(0, str(_BACKEND_ROOT))
+
+from env_load import load_backend_env
+
+load_backend_env()
+
 from geoalchemy2.elements import WKTElement
 from sqlalchemy import delete, select
+from sqlalchemy.exc import OperationalError
 
 from ai.cooling_tower_detection import detect_cooling_tower
 from database.engine import get_session_factory, init_db
@@ -71,7 +83,6 @@ from services.seed_scoring import (
     water_yield_pillar,
 )
 
-_BACKEND_ROOT = Path(__file__).resolve().parent.parent
 _DATA = _BACKEND_ROOT / "data"
 
 # Fallback centers if lat/lon omitted in CSV (legacy jitter).
@@ -249,6 +260,15 @@ def seed(
                 fp_wkt = fp_wkt_raw
             else:
                 fp_wkt = footprint_multipolygon_wkt(lat, lon, roof)
+            ds_raw = (row.get("data_source") or "").strip() or None
+            if ds_raw is None:
+                data_source = (
+                    "microsoft_us_building_footprints"
+                    if fp_wkt_raw
+                    else "synthetic_commercial_seed"
+                )
+            else:
+                data_source = ds_raw
             session.add(
                 Building(
                     id=bid,
@@ -261,6 +281,7 @@ def seed(
                     land_use_type=(row.get("land_use_type") or "").strip() or None,
                     latitude=lat,
                     longitude=lon,
+                    data_source=data_source,
                     footprint_geom=WKTElement(fp_wkt, srid=4326),
                 )
             )
@@ -462,10 +483,20 @@ if __name__ == "__main__":
     p.add_argument("--company-sustainability-csv", type=Path, default=None)
     p.add_argument("--company-documents-csv", type=Path, default=None)
     args = p.parse_args()
-    seed(
-        state_context_csv=args.state_context_csv,
-        buildings_csv=args.buildings_csv,
-        companies_csv=args.companies_csv,
-        company_sustainability_csv=args.company_sustainability_csv,
-        company_documents_csv=args.company_documents_csv,
-    )
+    try:
+        seed(
+            state_context_csv=args.state_context_csv,
+            buildings_csv=args.buildings_csv,
+            companies_csv=args.companies_csv,
+            company_sustainability_csv=args.company_sustainability_csv,
+            company_documents_csv=args.company_documents_csv,
+        )
+    except OperationalError as exc:
+        print(
+            "\nCould not connect to PostgreSQL (check DATABASE_URL in backend/.env). "
+            "Connection refused usually means no server on that host:port.\n"
+            "  • Repo root: docker compose up -d   (needs Docker installed; see docker-compose.yml)\n"
+            "  • Or install/run PostGIS locally and match DATABASE_URL.\n",
+            file=sys.stderr,
+        )
+        raise SystemExit(1) from exc

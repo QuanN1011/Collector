@@ -1,3 +1,5 @@
+"""Catalog building routes. Address → Maps → Gemini pipeline: ``routes/analyze_building`` (``GET /analyze-building``)."""
+
 from fastapi import APIRouter, HTTPException, Query
 
 from database.db import get_state_context, get_building, list_buildings
@@ -12,6 +14,8 @@ def get_buildings(state: str | None = Query(None, description="US state code, e.
     if state is not None:
         try:
             get_state_context(state)
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e)) from e
         except KeyError as e:
             raise HTTPException(status_code=400, detail=str(e)) from e
     records = list_buildings(state)
@@ -27,7 +31,8 @@ def get_one_building(
     building_id: str,
     live_cv: bool = Query(
         False,
-        description="If true, run Earth Engine + Gemini (requires ENABLE_LIVE_CV and credentials). Cached per id.",
+        description="If true, fetch Static Maps satellite + Gemini roof/tower analysis (requires ENABLE_LIVE_CV, "
+        "GOOGLE_MAPS_API_KEY, GEMINI_API_KEY). Cached in building_cv_analysis.",
     ),
 ) -> BuildingEnriched:
     record = get_building(building_id)

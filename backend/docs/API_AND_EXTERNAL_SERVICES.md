@@ -104,9 +104,16 @@ GET http://127.0.0.1:8000/building/tx-dfw-001?live_cv=true
 | `GEMINI_API_KEY` | `google.genai.Client` |
 | `GEMINI_MODEL` | Which Gemini model name to call |
 | `ENABLE_LIVE_CV` | Must be `true` to allow the live path when `?live_cv=true` |
+| `GEE_BUFFER_METERS` | Radius (m) around the building lat/lon for the Sentinel-2 chip (larger = more plant context, coarser per-pixel detail at fixed thumb size) |
+| `GEE_THUMB_SIZE` | Square PNG edge in pixels from Earth Engine (`getThumbURL`). Larger = easier to see cooling infrastructure, more Gemini image tokens |
+| `SAVE_GEE_THUMBNAILS` | If `true`, writes each fetched RGB PNG to **`backend/debug_gee_thumbnails/{building_id}.png`** (same bytes sent to Gemini) |
 | `GOOGLE_APPLICATION_CREDENTIALS` | Optional; service account JSON path for EE (if you use that instead of user auth) |
 
 See **`backend/.env.example`**.
+
+### Roof square footage vs lat/lon
+
+**Lat/lon** only pins a point on the map. This app’s **`roof_area_sqft`** (and the **≥100k sq ft “large roof”** flag) come from the **building footprint / dataset** loaded into Postgres or CSV (e.g. Microsoft US Building Footprints, synthetic seed), **not** from measuring the satellite thumbnail. Reverse geocoding the coordinates gives place names or parcels, not reliable roof area. Deriving footprint from imagery would require a separate segmentation / building-outline pipeline (not implemented here).
 
 ---
 
@@ -139,4 +146,8 @@ If any assertion fails, the script exits with an error so you know something bro
 ## 7. Related docs
 
 - **[VISION_PIPELINE.md](./VISION_PIPELINE.md)** — mock vs live, caching, troubleshooting.  
+- **[CV_IMPLEMENTATION_SUMMARY.md](./CV_IMPLEMENTATION_SUMMARY.md)** — CV handoff: file map, what is implemented vs not yet.  
+- **[DATA_SOURCES_WATER_PRICING.md](./DATA_SOURCES_WATER_PRICING.md)** — using third-party state water cost tables (e.g. [World Population Review](https://worldpopulationreview.com/state-rankings/water-prices-by-state)): units, conversion to `water_price_per_1000_gal_usd`, scrape vs CSV.  
+- **[PROSPECTING.md](./PROSPECTING.md)** — state prospecting: **`GET /states`**, CSV vs Postgres, pilot states TX/AZ/PA, frontend checklist.  
+- **[ROOF_CATCHMENT_LINEAGE.md](./ROOF_CATCHMENT_LINEAGE.md)** — >100k roof flag, **`roof_confidence`** / provenance (catalog vs CV).  
 - **OpenAPI UI** — run `uvicorn` and open `http://127.0.0.1:8000/docs` to try endpoints interactively.
