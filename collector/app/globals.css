@@ -46,6 +46,10 @@ body {
   box-shadow: 0 0 0 1px rgb(34 211 238);
 }
 
+.pac-container {
+  z-index: 10050 !important;
+}
+
 .reveal {
   opacity: 0;
   transform: translateY(32px);

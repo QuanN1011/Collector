@@ -33,7 +33,7 @@ export default function ProspectingSection({ model }: { model: ProspectingModel 
   return (
     <section
       id="rainuse-nexus"
-      className="relative scroll-mt-24 border-y border-cyan-200/40 bg-gradient-to-b from-cyan-50/40 via-white to-white py-20 px-6 sm:px-10 lg:px-16"
+      className="relative z-30 scroll-mt-24 border-y border-cyan-200/40 bg-gradient-to-b from-cyan-50/40 via-white to-white py-20 px-6 sm:px-10 lg:px-16"
     >
       <div className="mx-auto max-w-7xl">
         <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -139,16 +139,22 @@ export default function ProspectingSection({ model }: { model: ProspectingModel 
                   </button>
                 ) : null}
               </div>
-              {mapsJsKey ? (
-                <div className="rounded-xl border border-cyan-200/60 bg-gradient-to-b from-cyan-50/50 to-slate-50/40 p-3 shadow-sm shadow-cyan-900/5">
-                  <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-cyan-800/90">Address search</p>
-                  <PlacesAutocompleteInput
-                    placeholder="Type an address, then pick a suggestion"
-                    disabled={p.satelliteLoading}
-                    onPlaceResolved={(place) => p.setStreetAddress(place.formattedAddress)}
-                  />
-                </div>
-              ) : null}
+              <div className="rounded-xl border border-cyan-200/60 bg-gradient-to-b from-cyan-50/50 to-slate-50/40 p-3 shadow-sm shadow-cyan-900/5">
+                <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-cyan-800/90">Address search</p>
+                {!mapsJsKey ? (
+                  <p className="mb-2 text-xs text-slate-600">
+                    Set{" "}
+                    <code className="rounded bg-white px-1 py-0.5 font-mono text-[11px]">NEXT_PUBLIC_GOOGLE_MAPS_JS_API_KEY</code> for
+                    Google suggestions; you can still type an address below.
+                  </p>
+                ) : null}
+                <PlacesAutocompleteInput
+                  value={p.streetAddress}
+                  onChange={p.setStreetAddress}
+                  placeholder="Type an address, then pick a suggestion"
+                  disabled={p.satelliteLoading}
+                />
+              </div>
             </div>
 
             <div className="flex flex-col gap-2 sm:col-span-2 lg:col-span-2">

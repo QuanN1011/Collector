@@ -68,7 +68,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="relative overflow-x-hidden bg-slate-50 text-slate-950">
+    <div className="relative overflow-x-clip bg-slate-50 text-slate-950">
       <Header />
       <div className="fixed right-4 top-20 z-[60] flex flex-col items-end gap-2 sm:right-6 sm:top-24">
         <AuthBar />
