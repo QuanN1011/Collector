@@ -1,8 +1,8 @@
 /**
- * Load Maps JavaScript API once. Place autocomplete uses `PlaceAutocompleteElement`, which calls
- * **Places API (New)** (`places.googleapis.com`). In Google Cloud → APIs & Services → Library, enable
- * **“Places API (New)”** on the same project as `NEXT_PUBLIC_GOOGLE_MAPS_JS_API_KEY` (not only
- * “Places API” / legacy). Also enable **Maps JavaScript API**. Key: HTTP referrer–restricted.
+ * Load Maps JavaScript API once. Address search uses `importLibrary("places")` and the **Places API
+ * (New)** programmatic autocomplete (`AutocompleteSuggestion.fetchAutocompleteSuggestions`, `Place.fetchFields`).
+ * In Google Cloud enable **Maps JavaScript API** and **Places API (New)**. Key: HTTP referrer–restricted.
+ * @see https://developers.google.com/maps/documentation/javascript/places-migration-autocomplete
  */
 export const mapsJsKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_JS_API_KEY ?? "";
 
