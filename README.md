@@ -140,6 +140,8 @@ cp collector/.env.example collector/.env.local
 
 Restart `npm run dev` after changing env vars.
 
+`collector/next.config.ts` also loads `.env.local` from the **repository root** (parent of `collector/`), so `NEXT_PUBLIC_*` works if you only keep one file at `/Collector/.env.local` instead of `/Collector/collector/.env.local`. Values in `collector/.env.local` still override the same keys when both exist.
+
 ---
 
 ## 7. Run everything (frontend + backend)
