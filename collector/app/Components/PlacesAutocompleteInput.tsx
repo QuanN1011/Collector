@@ -15,12 +15,10 @@ type Props = {
   placeholder?: string;
   className?: string;
   disabled?: boolean;
+  value: string;
+  onValueChange: (value: string) => void;
   /** Fires when user picks a suggestion (lat/lng from Places geometry). */
   onPlaceResolved: (place: ResolvedPlace) => void;
-};
-
-type PlacesLibWithPac = google.maps.PlacesLibrary & {
-  PlaceAutocompleteElement: typeof google.maps.places.PlaceAutocompleteElement;
 };
 
 function latLngParts(loc: google.maps.LatLng | google.maps.LatLngLiteral): { lat: number; lng: number } {
@@ -30,103 +28,100 @@ function latLngParts(loc: google.maps.LatLng | google.maps.LatLngLiteral): { lat
 }
 
 /**
- * Google Places autocomplete (new `PlaceAutocompleteElement`). Legacy `Autocomplete` is unavailable
- * for new API projects; requires browser key + Places API (New) / Maps JS places library.
+ * Native text field so typing always works in React. When a Maps key is set, optionally attaches
+ * legacy `google.maps.places.Autocomplete` to the same input for suggestions (when the API still exposes it).
+ * The `PlaceAutocompleteElement` web component was dropped — it conflicted with React + shadow DOM in practice.
  */
 export default function PlacesAutocompleteInput({
   id,
   placeholder = "Start typing an address…",
   className = "",
   disabled = false,
+  value,
+  onValueChange,
   onPlaceResolved,
 }: Props) {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const acRef = useRef<google.maps.places.Autocomplete | null>(null);
   const cbRef = useRef(onPlaceResolved);
+  const onValueChangeRef = useRef(onValueChange);
 
   useEffect(() => {
     cbRef.current = onPlaceResolved;
   }, [onPlaceResolved]);
 
   useEffect(() => {
-    if (!mapsJsKey || !containerRef.current || disabled) return;
+    onValueChangeRef.current = onValueChange;
+  }, [onValueChange]);
 
-    const container = containerRef.current;
-    let cancelled = false;
-    let pac: google.maps.places.PlaceAutocompleteElement | null = null;
-
-    const onSelect = async (ev: Event) => {
-      if (cancelled) return;
-      const placePrediction = (ev as unknown as { placePrediction?: google.maps.places.PlacePrediction })
-        .placePrediction;
-      if (!placePrediction) return;
-
-      try {
-        const place = placePrediction.toPlace();
-        await place.fetchFields({
-          fields: ["displayName", "formattedAddress", "location"],
-        });
-        const loc = place.location;
-        if (!loc) return;
-        const { lat, lng } = latLngParts(loc);
-        cbRef.current({
-          formattedAddress:
-            (place.formattedAddress ?? place.displayName ?? "").trim() ||
-            (typeof (pac as unknown as { value?: string }).value === "string"
-              ? (pac as unknown as { value: string }).value.trim()
-              : ""),
-          lat,
-          lng,
-        });
-      } catch {
-        /* ignore selection fetch errors */
+  useEffect(() => {
+    if (!mapsJsKey || disabled) {
+      const ac = acRef.current;
+      acRef.current = null;
+      if (ac && typeof google !== "undefined" && google.maps?.event) {
+        google.maps.event.clearInstanceListeners(ac);
       }
-    };
+      return;
+    }
+
+    let cancelled = false;
 
     void (async () => {
       try {
         await loadMapsScript();
-        const { PlaceAutocompleteElement } = (await google.maps.importLibrary(
-          "places",
-        )) as PlacesLibWithPac;
-        if (cancelled || !container) return;
+        await google.maps.importLibrary("places");
+        if (cancelled || !inputRef.current) return;
 
-        const opts: google.maps.places.PlaceAutocompleteElementOptions = {
+        const AutocompleteCtor = (
+          google.maps.places as unknown as {
+            Autocomplete?: new (input: HTMLInputElement, opts?: google.maps.places.AutocompleteOptions) => google.maps.places.Autocomplete;
+          }
+        ).Autocomplete;
+
+        if (typeof AutocompleteCtor !== "function") return;
+
+        const ac = new AutocompleteCtor(inputRef.current, {
           types: ["geocode"],
-        };
-        const el = new PlaceAutocompleteElement(opts);
-        if (id) el.id = id;
-        el.setAttribute("placeholder", placeholder);
+          fields: ["formatted_address", "geometry"],
+        });
+        acRef.current = ac;
 
-        el.addEventListener("gmp-select", onSelect);
-        if (cancelled) {
-          el.removeEventListener("gmp-select", onSelect);
-          return;
-        }
-        container.appendChild(el);
-        pac = el;
+        ac.addListener("place_changed", () => {
+          const place = ac.getPlace();
+          const loc = place.geometry?.location;
+          const addr = (place.formatted_address ?? "").trim();
+          if (!loc || !addr) return;
+          const { lat, lng } = latLngParts(loc);
+          onValueChangeRef.current(addr);
+          cbRef.current({ formattedAddress: addr, lat, lng });
+        });
       } catch {
-        /* load / library failure */
+        /* Autocomplete unavailable for this key/project — plain typing still works */
       }
     })();
 
     return () => {
       cancelled = true;
-      if (pac) {
-        pac.removeEventListener("gmp-select", onSelect);
-        pac.remove();
-        pac = null;
+      const ac = acRef.current;
+      acRef.current = null;
+      if (ac && typeof google !== "undefined" && google.maps?.event) {
+        google.maps.event.clearInstanceListeners(ac);
       }
     };
-  }, [disabled, id, placeholder]);
-
-  if (!mapsJsKey) {
-    return null;
-  }
+  }, [mapsJsKey, disabled]);
 
   return (
-    <div
-      ref={containerRef}
-      className={`places-autocomplete-host w-full min-w-0 [&_gmp-place-autocomplete]:block [&_gmp-place-autocomplete]:w-full ${className}`}
+    <input
+      ref={inputRef}
+      id={id}
+      type="text"
+      value={value}
+      onChange={(e) => onValueChange(e.target.value)}
+      disabled={disabled}
+      placeholder={placeholder}
+      autoComplete="street-address"
+      spellCheck={false}
+      className={`w-full rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2.5 text-slate-950 outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 disabled:opacity-60 ${className}`}
     />
   );
 }
