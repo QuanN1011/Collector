@@ -34,6 +34,7 @@ body {
   html, body, a, button, input, textarea, select, [role="button"] {
     cursor: none !important;
   }
+}
 /* PlaceAutocompleteElement — match slate/cyan UI; `color-scheme: light` avoids a black host when OS is dark mode */
 .places-autocomplete-host gmp-place-autocomplete {
   display: block;

@@ -33,7 +33,7 @@ export default function ProspectingSection({ model }: { model: ProspectingModel 
   return (
     <section
       id="rainuse-nexus"
-      className="relative scroll-mt-24 border-y border-cyan-200/40 bg-gradient-to-b from-cyan-50/40 via-white to-white py-20 px-6 sm:px-10 lg:px-16"
+      className="relative z-[20] scroll-mt-24 border-y border-cyan-200/40 bg-gradient-to-b from-cyan-50/40 via-white to-white py-20 px-6 sm:px-10 lg:px-16"
     >
       <div className="mx-auto max-w-7xl">
         <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -87,16 +87,16 @@ export default function ProspectingSection({ model }: { model: ProspectingModel 
           <div className="mb-6 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-900">{p.error}</div>
         )}
 
-        {/* TOP INPUT CARD */}
-        <div className="mb-8 rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-12 lg:items-end lg:gap-x-4 lg:gap-y-4">
-            <label className="flex flex-col gap-2 text-sm sm:col-span-1 lg:col-span-2">
-              <span className="font-semibold text-slate-800">State</span>
+        {/* TOP INPUT CARD — aligned label row + control row */}
+        <div className="pointer-events-auto relative z-[1] mb-8 rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-12 lg:items-end lg:gap-x-4">
+            <div className="flex min-w-0 flex-col gap-2 lg:col-span-2">
+              <span className="text-sm font-semibold leading-5 text-slate-800">State</span>
               <select
                 value={p.selectedState}
                 onChange={(e) => p.setSelectedState(e.target.value)}
                 disabled={p.loadingStates || p.states.length === 0}
-                className="rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2.5 text-slate-950 outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 disabled:opacity-60"
+                className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50/80 px-3 text-sm text-slate-950 outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 disabled:opacity-60"
               >
                 {p.states.length === 0 && !p.loadingStates ? <option value="">No states</option> : null}
                 {p.states.map((s) => (
@@ -105,15 +105,15 @@ export default function ProspectingSection({ model }: { model: ProspectingModel 
                   </option>
                 ))}
               </select>
-            </label>
+            </div>
 
-            <label className="flex flex-col gap-2 text-sm sm:col-span-1 lg:col-span-4">
-              <span className="font-semibold text-slate-800">Building</span>
+            <div className="flex min-w-0 flex-col gap-2 lg:col-span-4">
+              <span className="text-sm font-semibold leading-5 text-slate-800">Building</span>
               <select
                 value={p.selectedBuildingId}
                 onChange={(e) => p.setSelectedBuildingId(e.target.value)}
                 disabled={p.loadingBuildings || p.buildings.length === 0}
-                className="rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2.5 text-slate-950 outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 disabled:opacity-60"
+                className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50/80 px-3 text-sm text-slate-950 outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 disabled:opacity-60"
               >
                 {p.buildings.map((b) => (
                   <option key={b.id} value={b.id}>
@@ -122,11 +122,11 @@ export default function ProspectingSection({ model }: { model: ProspectingModel 
                   </option>
                 ))}
               </select>
-            </label>
+            </div>
 
-            <div className="flex min-w-0 flex-col gap-3 text-sm sm:col-span-2 lg:col-span-4">
-              <div className="flex items-baseline justify-between gap-2">
-                <span className="font-semibold text-slate-800">
+            <div className="flex min-w-0 flex-col gap-2 lg:col-span-4">
+              <div className="flex h-5 min-h-[1.25rem] items-center justify-between gap-2">
+                <span className="text-sm font-semibold leading-5 text-slate-800">
                   Address <span className="font-normal text-slate-400">(optional)</span>
                 </span>
                 {p.streetAddress ? (
@@ -137,29 +137,42 @@ export default function ProspectingSection({ model }: { model: ProspectingModel 
                   >
                     Clear
                   </button>
-                ) : null}
+                ) : (
+                  <span className="w-10 shrink-0" aria-hidden="true"></span>
+                )}
               </div>
-              {mapsJsKey ? (
-                <div className="rounded-xl border border-cyan-200/60 bg-gradient-to-b from-cyan-50/50 to-slate-50/40 p-3 shadow-sm shadow-cyan-900/5">
-                  <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-cyan-800/90">Address search</p>
+              <div className="places-autocomplete-host flex min-h-[2.75rem] items-center rounded-xl border border-cyan-200/60 bg-gradient-to-b from-cyan-50/50 to-slate-50/40 px-1 shadow-sm shadow-cyan-900/5">
+                {mapsJsKey ? (
                   <PlacesAutocompleteInput
-                    placeholder="Type an address, then pick a suggestion"
+                    placeholder="Search places or addresses"
                     disabled={p.satelliteLoading}
+                    value={p.streetAddress}
+                    onValueChange={p.setStreetAddress}
                     onPlaceResolved={(place) => p.setStreetAddress(place.formattedAddress)}
+                    className="!min-h-[2.5rem] !border-0 !bg-transparent !shadow-none"
                   />
-                </div>
-              ) : null}
+                ) : (
+                  <input
+                    type="text"
+                    value={p.streetAddress}
+                    onChange={(e) => p.setStreetAddress(e.target.value)}
+                    disabled={p.satelliteLoading}
+                    placeholder="Type an address"
+                    className="h-11 w-full rounded-lg border-0 bg-transparent px-3 text-sm text-slate-950 outline-none focus:ring-0 disabled:opacity-60"
+                  />
+                )}
+              </div>
             </div>
 
-            <div className="flex flex-col gap-2 sm:col-span-2 lg:col-span-2">
-              <span className="text-sm font-semibold text-slate-800 lg:invisible lg:select-none" aria-hidden>
+            <div className="flex flex-col gap-2 lg:col-span-2">
+              <span className="h-5 min-h-[1.25rem] text-sm font-semibold leading-5 text-transparent select-none" aria-hidden>
                 Run
               </span>
               <button
                 type="button"
                 disabled={!canRun}
                 onClick={() => void p.runSatelliteAnalysis()}
-                className="rounded-full bg-slate-950 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-slate-900/10 transition hover:bg-slate-800 disabled:opacity-50"
+                className="flex h-11 w-full items-center justify-center rounded-full bg-slate-950 px-4 text-sm font-semibold text-white shadow-lg shadow-slate-900/10 transition hover:bg-slate-800 disabled:opacity-50"
               >
                 {p.satelliteLoading ? "Running…" : "Run satellite analysis"}
               </button>
