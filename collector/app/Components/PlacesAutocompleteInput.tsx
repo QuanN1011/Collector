@@ -82,8 +82,11 @@ export default function PlacesAutocompleteInput({
   const wrapRef = useRef<HTMLDivElement>(null);
   const sessionRef = useRef<google.maps.places.AutocompleteSessionToken | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const valueRef = useRef(value);
   const cbRef = useRef(onPlaceResolved);
   const onValueChangeRef = useRef(onValueChange);
+
+  valueRef.current = value;
 
   const [open, setOpen] = useState(false);
   const [rows, setRows] = useState<RowModel[]>([]);
@@ -115,8 +118,16 @@ export default function PlacesAutocompleteInput({
 
         const fetchFn = google.maps.places.AutocompleteSuggestion?.fetchAutocompleteSuggestions;
         const hasNewAutocomplete = typeof fetchFn === "function";
+        if (!hasNewAutocomplete && process.env.NODE_ENV === "development") {
+          console.warn(
+            "[PlacesAutocomplete] `AutocompleteSuggestion.fetchAutocompleteSuggestions` is missing. Enable **Places API (New)** for this API key and use a browser key with Maps JavaScript API.",
+          );
+        }
         if (!cancelled) setPlacesReady(hasNewAutocomplete);
-      } catch {
+      } catch (err) {
+        if (process.env.NODE_ENV === "development") {
+          console.warn("[PlacesAutocomplete] Maps / Places library failed to load", err);
+        }
         if (!cancelled) setPlacesReady(false);
       }
     })();
@@ -168,13 +179,24 @@ export default function PlacesAutocompleteInput({
         setOpen(true);
         setActiveIndex(-1);
       }
-    } catch {
+    } catch (err) {
+      if (process.env.NODE_ENV === "development") {
+        console.warn("[PlacesAutocomplete] fetchAutocompleteSuggestions failed", err);
+      }
       setRows([]);
       setOpen(false);
     } finally {
       setLoading(false);
     }
   }, [placesReady]);
+
+  /** If the user typed before `importLibrary("places")` finished, refetch once the new API is ready. */
+  useEffect(() => {
+    if (!placesReady || disabled) return;
+    const v = valueRef.current.trim();
+    if (v.length < MIN_CHARS) return;
+    void fetchPredictions(valueRef.current);
+  }, [placesReady, disabled, fetchPredictions]);
 
   const scheduleFetch = useCallback(
     (raw: string) => {
